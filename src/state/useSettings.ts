@@ -5,6 +5,7 @@ import type { WeightUnit } from '../lib/weight.ts'
 export interface Settings {
   music: boolean
   youtube: boolean
+  pomodoro: boolean
   weightTracking: boolean // plus feature, off until switched on
   weightUnit: WeightUnit
 }
@@ -12,6 +13,7 @@ export interface Settings {
 const DEFAULTS: Settings = {
   music: true,
   youtube: true,
+  pomodoro: true,
   weightTracking: false,
   weightUnit: 'kg',
 }

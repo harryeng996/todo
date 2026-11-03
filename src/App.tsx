@@ -4,6 +4,8 @@ import { Clock } from './components/clock/Clock.tsx'
 import { Countdown } from './components/clock/Countdown.tsx'
 import { DayGrid } from './components/grid/DayGrid.tsx'
 import { MusicPlayer } from './components/music/MusicPlayer.tsx'
+import { PomodoroCard } from './components/pomodoro/PomodoroCard.tsx'
+import { PomodoroStats } from './components/pomodoro/PomodoroStats.tsx'
 import { QuoteCard } from './components/quotes/QuoteCard.tsx'
 import {
   SettingsDialog,
@@ -15,10 +17,12 @@ import { TodoPanel } from './components/todo/TodoPanel.tsx'
 import { WeightPanel } from './components/weight/WeightPanel.tsx'
 import { YouTubePanel } from './components/youtube/YouTubePanel.tsx'
 import { MUSIC_PLAYER_ENABLED } from './features.ts'
+import { PomodoroProvider } from './state/PomodoroContext.tsx'
 import { QuoteProvider } from './state/QuoteContext.tsx'
 import { TodoProvider } from './state/TodoContext.tsx'
 import { useSettings } from './state/useSettings.ts'
 import { useToday } from './state/useToday.ts'
+import { VideoProvider } from './state/VideoContext.tsx'
 import { WeightProvider } from './state/WeightContext.tsx'
 
 function Page() {
@@ -29,7 +33,8 @@ function Page() {
     false,
   )
   const showMusic = MUSIC_PLAYER_ENABLED && settings.music
-  const showMedia = showMusic || settings.youtube
+  const showMedia = showMusic || settings.youtube || settings.pomodoro
+  const [statsOpen, setStatsOpen] = useState(false)
 
   // At midnight: if today was selected, follow the new today.
   const [previousToday, setPreviousToday] = useState(today)
@@ -79,8 +84,16 @@ function Page() {
         {showMedia && (
           <div className="page__media">
             {showMusic && <MusicPlayer />}
-            {/* Renders two boxes: the player and its list of links. */}
-            {settings.youtube && <YouTubePanel />}
+            {settings.youtube && (
+              <YouTubePanel onManage={() => setSettingsOpen('videos')} />
+            )}
+            {settings.pomodoro && (
+              <PomodoroCard
+                today={today}
+                onShowStats={() => setStatsOpen(true)}
+                onConfigure={() => setSettingsOpen('pomodoro')}
+              />
+            )}
           </div>
         )}
       </div>
@@ -93,6 +106,11 @@ function Page() {
           />
         </SketchBox>
       )}
+      <PomodoroStats
+        open={statsOpen}
+        onClose={() => setStatsOpen(false)}
+        today={today}
+      />
       <SettingsDialog
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
@@ -109,7 +127,11 @@ export default function App() {
     <TodoProvider>
       <WeightProvider>
         <QuoteProvider>
-          <Page />
+          <VideoProvider>
+            <PomodoroProvider>
+              <Page />
+            </PomodoroProvider>
+          </VideoProvider>
         </QuoteProvider>
       </WeightProvider>
     </TodoProvider>

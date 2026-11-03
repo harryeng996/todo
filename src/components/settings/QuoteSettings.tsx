@@ -44,7 +44,7 @@ export function QuoteSettings() {
 
   return (
     <fieldset className="settings__group" id="settings-quotes">
-      <legend>Quotes</legend>
+      <legend className="visually-hidden">Quotes</legend>
 
       <SettingsToggle
         id="setting-quote-rotate"

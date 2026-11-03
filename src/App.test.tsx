@@ -59,10 +59,9 @@ describe('countdown', () => {
     unmount()
     render(<App />)
     expect(screen.getByText('Finish thesis')).toBeInTheDocument()
-    expect(screen.getByRole('progressbar')).toHaveAttribute(
-      'aria-valuenow',
-      '10',
-    )
+    expect(
+      screen.getByRole('progressbar', { name: /^Progress towards/ }),
+    ).toHaveAttribute('aria-valuenow', '10')
   })
 
   it('rejects a final day before the start', async () => {
@@ -94,19 +93,25 @@ describe('several targets', () => {
     await addTarget('Set a target', 'Finish thesis', 9)
     await addTarget('Add target', 'Run 10 km', 29)
 
-    expect(screen.getAllByRole('progressbar')).toHaveLength(2)
+    expect(
+      screen.getAllByRole('progressbar', { name: /^Progress towards/ }),
+    ).toHaveLength(2)
     expect(screen.getByText('10% · 9 days left')).toBeInTheDocument()
     expect(screen.getByText('3% · 29 days left')).toBeInTheDocument()
 
     unmount()
     render(<App />)
-    expect(screen.getAllByRole('progressbar')).toHaveLength(2)
+    expect(
+      screen.getAllByRole('progressbar', { name: /^Progress towards/ }),
+    ).toHaveLength(2)
 
     await user.click(
       screen.getByRole('button', { name: 'Edit target "Finish thesis"' }),
     )
     await user.click(screen.getByRole('button', { name: 'Remove target' }))
-    expect(screen.getAllByRole('progressbar')).toHaveLength(1)
+    expect(
+      screen.getAllByRole('progressbar', { name: /^Progress towards/ }),
+    ).toHaveLength(1)
     expect(screen.queryByText('Finish thesis')).not.toBeInTheDocument()
     expect(screen.getByText('Run 10 km')).toBeInTheDocument()
   })
@@ -459,6 +464,7 @@ describe('weight tracking', () => {
   async function enableWeight(user: ReturnType<typeof userEvent.setup>) {
     await user.click(screen.getByRole('button', { name: 'Settings' }))
     const dialog = screen.getByRole('dialog', { name: 'Settings' })
+    await user.click(within(dialog).getByRole('tab', { name: 'Weight' }))
     await user.click(within(dialog).getByLabelText(/Weight tracking/))
     await user.click(
       within(dialog).getByRole('button', { name: 'Close settings' }),
@@ -524,6 +530,7 @@ describe('weight tracking', () => {
     await user.type(screen.getByLabelText('Weight in kg'), '72.4{Enter}')
 
     await user.click(screen.getByRole('button', { name: 'Settings' }))
+    await user.click(within(dialog).getByRole('tab', { name: 'Weight' }))
     await user.click(within(dialog).getByLabelText('lb'))
     await user.click(
       within(dialog).getByRole('button', { name: 'Close settings' }),
@@ -592,45 +599,226 @@ describe('weight tracking', () => {
 describe('youtube', () => {
   it('adds, switches and removes videos through a privacy-mode embed', async () => {
     const user = userEvent.setup()
-    const { container, unmount } = render(<App />)
-    const link = screen.getByLabelText('YouTube link or embed code')
+    const { unmount } = render(<App />)
+    const frame = () => document.querySelector('iframe')
+
+    // No video yet: the player offers to add one, which opens Settings → Videos.
+    await user.click(screen.getByRole('button', { name: 'Add a YouTube link' }))
+    const dialog = screen.getByRole('dialog', { name: 'Settings' })
+    expect(within(dialog).getByRole('tab', { name: 'Videos' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    const link = within(dialog).getByLabelText('YouTube link or embed code')
 
     await user.type(link, 'not a video')
-    await user.click(screen.getByRole('button', { name: 'Add video' }))
-    expect(screen.getByRole('alert')).toHaveTextContent(
+    await user.click(within(dialog).getByRole('button', { name: 'Add video' }))
+    expect(within(dialog).getByRole('alert')).toHaveTextContent(
       "doesn't look like a YouTube link",
     )
 
     await user.clear(link)
     await user.type(link, 'https://youtu.be/dQw4w9WgXcQ?t=30')
     await user.type(
-      screen.getByLabelText('Video name (optional)'),
+      within(dialog).getByLabelText('Video name (optional)'),
       'Focus music',
     )
-    await user.click(screen.getByRole('button', { name: 'Add video' }))
-    const frame = () => container.querySelector('iframe')!
-    expect(frame().src).toBe(
+    await user.click(within(dialog).getByRole('button', { name: 'Add video' }))
+    expect(frame()!.src).toBe(
       'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0&start=30',
     )
-    expect(frame().title).toBe('Focus music')
+    expect(frame()!.title).toBe('Focus music')
 
     await user.type(link, 'https://www.youtube.com/watch?v=jfKfPfyJRdk')
-    await user.click(screen.getByRole('button', { name: 'Add video' }))
-    expect(frame().src).toContain('/embed/jfKfPfyJRdk')
+    await user.click(within(dialog).getByRole('button', { name: 'Add video' }))
+    expect(frame()!.src).toContain('/embed/jfKfPfyJRdk')
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Close settings' }),
+    )
 
-    await user.click(screen.getByRole('button', { name: 'Focus music' }))
-    expect(frame().src).toContain('/embed/dQw4w9WgXcQ')
+    // Switch from the player's picker.
+    await user.selectOptions(
+      screen.getByLabelText('Choose a video'),
+      'Focus music',
+    )
+    expect(frame()!.src).toContain('/embed/dQw4w9WgXcQ')
 
     unmount()
-    const again = render(<App />)
-    expect(again.container.querySelector('iframe')!.src).toContain(
-      'dQw4w9WgXcQ',
-    )
+    render(<App />)
+    expect(frame()!.src).toContain('dQw4w9WgXcQ')
+    await user.click(screen.getByRole('button', { name: 'Manage video links' }))
     await user.click(
       screen.getByRole('button', { name: 'Remove "Focus music"' }),
     )
-    expect(again.container.querySelector('iframe')!.src).toContain(
-      'jfKfPfyJRdk',
+    expect(frame()!.src).toContain('jfKfPfyJRdk')
+  })
+})
+
+describe('settings tabs', () => {
+  it('shows one section at a time and moves with the arrow keys', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Settings' }))
+    const dialog = screen.getByRole('dialog', { name: 'Settings' })
+    const tab = (name: string) => within(dialog).getByRole('tab', { name })
+
+    expect(tab('General')).toHaveAttribute('aria-selected', 'true')
+    expect(within(dialog).getByLabelText('YouTube videos')).toBeInTheDocument()
+    expect(
+      within(dialog).queryByLabelText(/Weight tracking/),
+    ).not.toBeInTheDocument()
+
+    await user.click(tab('Quotes'))
+    expect(
+      within(dialog).getByLabelText('Rotate automatically'),
+    ).toBeInTheDocument()
+    expect(
+      within(dialog).queryByLabelText('YouTube videos'),
+    ).not.toBeInTheDocument()
+
+    tab('Quotes').focus()
+    await user.keyboard('{ArrowRight}')
+    expect(tab('Videos')).toHaveAttribute('aria-selected', 'true')
+    expect(tab('Videos')).toHaveFocus()
+    await user.keyboard('{End}')
+    expect(tab('Pomodoro')).toHaveAttribute('aria-selected', 'true')
+    expect(within(dialog).getByLabelText('Focus (min)')).toHaveValue(25)
+  })
+})
+
+describe('pomodoro', () => {
+  const card = () =>
+    screen
+      .getByRole('heading', { name: 'Pomodoro' })
+      .closest('.pomodoro') as HTMLElement
+
+  it('counts down, records a focus session with its task, then takes a break', () => {
+    localStorage.setItem(
+      'todoapp.todos.v2',
+      JSON.stringify([
+        {
+          id: 't1',
+          title: 'Write chapter 3',
+          done: false,
+          date: today(),
+          createdAt: '',
+        },
+      ]),
     )
+    vi.useFakeTimers({
+      toFake: [
+        'setTimeout',
+        'clearTimeout',
+        'setInterval',
+        'clearInterval',
+        'Date',
+      ],
+    })
+    render(<App />)
+    const countdown = () => card().querySelector('.pomodoro__time')!.textContent
+
+    expect(countdown()).toBe('25:00')
+    fireEvent.change(within(card()).getByLabelText('Working on'), {
+      target: { value: 't1' },
+    })
+    fireEvent.click(within(card()).getByRole('button', { name: 'Start' }))
+    act(() => {
+      vi.advanceTimersByTime(60_000)
+    })
+    expect(countdown()).toBe('24:00')
+    expect(document.title).toBe('24:00 · Focus')
+
+    fireEvent.click(within(card()).getByRole('button', { name: 'Pause' }))
+    act(() => {
+      vi.advanceTimersByTime(10 * 60_000)
+    })
+    expect(countdown()).toBe('24:00') // paused
+
+    fireEvent.click(within(card()).getByRole('button', { name: 'Resume' }))
+    act(() => {
+      vi.advanceTimersByTime(24 * 60_000)
+    })
+    expect(
+      within(card()).getByRole('button', { name: 'Short break' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    expect(countdown()).toBe('05:00')
+    expect(card().querySelector('.pomodoro__today')!.textContent).toMatch(
+      /Today: 1 session · 25m focused/,
+    )
+    const saved = JSON.parse(
+      localStorage.getItem('todoapp.pomodoro.sessions.v1')!,
+    )
+    expect(saved).toHaveLength(1)
+    expect(saved[0]).toMatchObject({
+      minutes: 25,
+      taskTitle: 'Write chapter 3',
+    })
+  })
+
+  it('uses the configured lengths', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(screen.getByRole('button', { name: 'Pomodoro settings' }))
+    const dialog = screen.getByRole('dialog', { name: 'Settings' })
+    const focus = within(dialog).getByLabelText('Focus (min)')
+    await user.clear(focus)
+    await user.type(focus, '50')
+    await user.tab()
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Close settings' }),
+    )
+    expect(card().querySelector('.pomodoro__time')!.textContent).toBe('50:00')
+
+    await user.click(within(card()).getByRole('button', { name: 'Long break' }))
+    expect(card().querySelector('.pomodoro__time')!.textContent).toBe('15:00')
+  })
+
+  it('shows statistics filtered by range and task', async () => {
+    const at = (day: string, minutes: number, taskTitle: string | null) => {
+      const end = new Date(`${day}T10:00:00`).getTime()
+      return {
+        id: `${day}-${taskTitle}`,
+        start: end - minutes * 60_000,
+        end,
+        date: day,
+        minutes,
+        taskId: null,
+        taskTitle,
+      }
+    }
+    localStorage.setItem(
+      'todoapp.pomodoro.sessions.v1',
+      JSON.stringify([
+        at(today(), 25, 'Thesis'),
+        at(addDays(today(), -2), 25, 'Reading'),
+        at(addDays(today(), -20), 50, 'Thesis'),
+      ]),
+    )
+    const user = userEvent.setup()
+    render(<App />)
+    await user.click(
+      screen.getByRole('button', { name: 'Pomodoro statistics' }),
+    )
+    const dialog = screen.getByRole('dialog', { name: 'Pomodoro statistics' })
+    const summary = () =>
+      dialog.querySelector('.pomodoro-stats__summary')!.textContent
+    const rows = () => within(dialog).queryAllByRole('listitem').length
+
+    expect(summary()).toContain('Focus time50m')
+    expect(rows()).toBe(2)
+
+    await user.selectOptions(
+      within(dialog).getByLabelText('Range'),
+      'Last 30 days',
+    )
+    expect(summary()).toContain('Focus time1h 40m')
+    expect(rows()).toBe(3)
+
+    await user.selectOptions(within(dialog).getByLabelText('Task'), 'Thesis')
+    expect(summary()).toContain('Sessions2')
+    expect(rows()).toBe(2)
+
+    await user.selectOptions(within(dialog).getByLabelText('Range'), 'Today')
+    expect(rows()).toBe(1)
   })
 })

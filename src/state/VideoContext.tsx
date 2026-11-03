@@ -1,11 +1,7 @@
-import { useEffect, useState } from 'react'
-import { createJsonStore } from '../../lib/storage.ts'
-import { parseYouTube, sameVideo, type YouTubeRef } from '../../lib/youtube.ts'
-
-export interface SavedVideo extends YouTubeRef {
-  id: string
-  name: string
-}
+import { useEffect, useState, type ReactNode } from 'react'
+import { createJsonStore } from '../lib/storage.ts'
+import { parseYouTube, sameVideo, type YouTubeRef } from '../lib/youtube.ts'
+import { VideoContext, type SavedVideo } from './useVideos.ts'
 
 interface VideoState {
   videos: SavedVideo[]
@@ -21,7 +17,7 @@ function defaultName(ref: YouTubeRef): string {
   return ref.videoId ? `Video ${ref.videoId}` : `Playlist ${ref.playlistId}`
 }
 
-export function useVideos() {
+export function VideoProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState(() => videoStore.load())
 
   useEffect(() => {
@@ -32,7 +28,6 @@ export function useVideos() {
     state.videos.find((video) => video.id === state.currentId) ??
     state.videos[0]
 
-  /** Returns an error message, or null when the video was added (or already saved). */
   function add(input: string, name: string): string | null {
     const ref = parseYouTube(input)
     if (!ref) return "That doesn't look like a YouTube link or embed code."
@@ -63,5 +58,11 @@ export function useVideos() {
     })
   }
 
-  return { videos: state.videos, current, add, select, remove }
+  return (
+    <VideoContext
+      value={{ videos: state.videos, current, add, select, remove }}
+    >
+      {children}
+    </VideoContext>
+  )
 }
