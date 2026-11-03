@@ -1,0 +1,117 @@
+/* Wobbly hand-drawn borders (the PaperCSS trick): asymmetric elliptical radii. */
+.sketch-border {
+  border: var(--stroke) solid var(--ink);
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+.sketch-border--alt {
+  border: var(--stroke) solid var(--ink);
+  border-radius: 15px 255px 15px 225px / 225px 15px 255px 15px;
+}
+
+/* Rough.js drawing surface: decoration only, stretched over its host. */
+.sketch-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.sketch-box {
+  position: relative;
+  padding: calc(var(--space) * 3);
+}
+
+.sketch-button {
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--space) * 0.75);
+  padding: calc(var(--space) * 0.75) calc(var(--space) * 2);
+  background: var(--paper);
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+  transition:
+    transform 80ms,
+    box-shadow 80ms;
+}
+
+.sketch-button:hover {
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.sketch-button:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.sketch-button--primary {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+.sketch-button--ghost {
+  padding: calc(var(--space) * 0.5);
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  color: var(--pencil);
+}
+
+.sketch-button--ghost:hover {
+  box-shadow: none;
+  color: var(--ink);
+}
+
+.sketch-input {
+  width: 100%;
+  min-width: 0;
+  padding: var(--space) calc(var(--space) * 1.5);
+  background: var(--paper);
+}
+
+.sketch-input::placeholder {
+  color: var(--pencil);
+}
+
+.sketch-input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+}
+
+.sketch-checkbox {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.sketch-checkbox:has(input:focus-visible) {
+  outline: 2px dashed var(--accent);
+  outline-offset: 4px;
+}
+
+.sketch-checkbox__tick path {
+  stroke: var(--accent);
+}
+
+.sketch-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.sketch-underline .sketch-svg {
+  top: auto;
+  bottom: -0.3em;
+  height: 0.4em;
+  color: var(--accent);
+}
+
+.sketch-strike {
+  position: relative;
+  display: inline-block;
+}

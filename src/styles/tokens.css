@@ -1,0 +1,14 @@
+:root {
+  --paper: #fdfdfb; /* near-white background */
+  --ink: #1f1f1f; /* primary lines + text */
+  --pencil: #6b6b6b; /* secondary text, completed items */
+  --accent: #3b6ea5; /* single flat accent (links, primary button) */
+  --marker: #ffe58a; /* flat highlighter fill, used sparingly */
+  --danger: #c0392b; /* delete */
+
+  --font-hand: 'Patrick Hand', 'Comic Neue', system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --stroke: 2px;
+  --space: 8px; /* spacing unit; use multiples */
+}

@@ -1,0 +1,67 @@
+.page {
+  max-width: 36rem;
+  margin: 0 auto;
+  padding: calc(var(--space) * 6) calc(var(--space) * 2);
+}
+
+.page__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space);
+  margin-bottom: calc(var(--space) * 4);
+}
+
+.page__title {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  font-size: 2.5rem;
+  font-weight: 400;
+}
+
+.page__count {
+  color: var(--pencil);
+}
+
+.todo-input {
+  display: flex;
+  gap: var(--space);
+  margin-bottom: calc(var(--space) * 3);
+}
+
+.todo-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.todo-list__empty {
+  padding: calc(var(--space) * 2) 0;
+  color: var(--pencil);
+  text-align: center;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--space) * 1.5);
+}
+
+.todo-item__title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.todo-item--done .todo-item__title {
+  color: var(--pencil);
+}
+
+.todo-item__delete:hover {
+  color: var(--danger);
+}
