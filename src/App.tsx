@@ -5,13 +5,17 @@ import { Countdown } from './components/clock/Countdown.tsx'
 import { DayGrid } from './components/grid/DayGrid.tsx'
 import { MusicPlayer } from './components/music/MusicPlayer.tsx'
 import { QuoteCard } from './components/quotes/QuoteCard.tsx'
-import { SettingsDialog } from './components/settings/SettingsDialog.tsx'
+import {
+  SettingsDialog,
+  type SettingsSection,
+} from './components/settings/SettingsDialog.tsx'
 import { SketchBox } from './components/sketch/SketchBox.tsx'
 import { SketchButton } from './components/sketch/SketchButton.tsx'
 import { TodoPanel } from './components/todo/TodoPanel.tsx'
 import { WeightPanel } from './components/weight/WeightPanel.tsx'
 import { YouTubePanel } from './components/youtube/YouTubePanel.tsx'
 import { MUSIC_PLAYER_ENABLED } from './features.ts'
+import { QuoteProvider } from './state/QuoteContext.tsx'
 import { TodoProvider } from './state/TodoContext.tsx'
 import { useSettings } from './state/useSettings.ts'
 import { useToday } from './state/useToday.ts'
@@ -21,7 +25,9 @@ function Page() {
   const today = useToday()
   const [selectedDate, setSelectedDate] = useState(today)
   const [settings, updateSettings] = useSettings()
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState<SettingsSection | false>(
+    false,
+  )
   const showMusic = MUSIC_PLAYER_ENABLED && settings.music
   const showMedia = showMusic || settings.youtube
 
@@ -48,7 +54,7 @@ function Page() {
             <Clock />
             <SketchButton
               variant="ghost"
-              onClick={() => setSettingsOpen(true)}
+              onClick={() => setSettingsOpen('general')}
               aria-label="Settings"
               title="Settings"
             >
@@ -67,7 +73,7 @@ function Page() {
             />
           </SketchBox>
           <div className="page__quote">
-            <QuoteCard />
+            <QuoteCard onConfigure={() => setSettingsOpen('quotes')} />
           </div>
         </div>
         {showMedia && (
@@ -102,7 +108,9 @@ export default function App() {
   return (
     <TodoProvider>
       <WeightProvider>
-        <Page />
+        <QuoteProvider>
+          <Page />
+        </QuoteProvider>
       </WeightProvider>
     </TodoProvider>
   )

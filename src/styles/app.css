@@ -578,11 +578,18 @@
   text-align: right;
 }
 
-.quote-card__next {
+.quote-card__actions {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 8px;
+  right: 8px;
+  display: flex;
   color: var(--ink);
+}
+
+.quote-card__empty {
+  margin: auto 0;
+  color: var(--ink);
+  font-size: 1.1rem;
 }
 
 @keyframes quote-in {
@@ -719,7 +726,7 @@
 /* Settings dialog */
 
 .settings {
-  width: min(28rem, calc(100vw - 32px));
+  width: min(40rem, calc(100vw - 32px));
   padding: 0;
   border: none;
   background: transparent;
@@ -732,7 +739,111 @@
 }
 
 .settings__box {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
   background: var(--paper);
+}
+
+/* Scrolls under the fixed header; the outline (drawn on the box) stays put. */
+.settings__body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin-right: -8px;
+  padding-right: 8px;
+  overflow-y: auto;
+}
+
+.settings__inline {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  padding-left: calc(24px + var(--space) * 1.5);
+  color: var(--pencil);
+}
+
+.settings__select {
+  padding: 2px var(--space);
+  background: var(--paper);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+/* Quote list in settings */
+
+.quote-list {
+  max-height: 16rem;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  border: 1.5px dashed var(--level-2);
+  border-radius: 4px;
+  list-style: none;
+  font-size: 1rem;
+}
+
+.quote-list__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  padding: 4px 2px;
+  border-bottom: 1px dashed var(--level-1);
+}
+
+.quote-list__item--excluded {
+  opacity: 0.45;
+}
+
+.quote-list__text {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.quote-list__author {
+  color: var(--pencil);
+}
+
+.quote-list__mine {
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 3px;
+  background: var(--marker);
+  font-size: 0.8rem;
+}
+
+.quote-list__actions {
+  display: flex;
+  flex: none;
+}
+
+.quote-list__delete:hover {
+  color: var(--danger);
+}
+
+.quote-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+}
+
+.quote-form__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+}
+
+.quote-form__row .sketch-button {
+  flex: none;
+  white-space: nowrap;
+}
+
+.quote-form__error {
+  color: var(--danger);
+  font-size: 1rem;
 }
 
 .settings__header {

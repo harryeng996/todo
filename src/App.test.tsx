@@ -254,6 +254,138 @@ describe('quotes', () => {
   })
 })
 
+describe('quote settings', () => {
+  const cardText = () =>
+    document.querySelector('.quote-card__text')?.textContent ?? ''
+
+  async function openQuoteSettings(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(screen.getByRole('button', { name: 'Quote settings' }))
+    return screen.getByRole('dialog', { name: 'Settings' })
+  }
+
+  async function addQuote(
+    user: ReturnType<typeof userEvent.setup>,
+    dialog: HTMLElement,
+    text: string,
+    author: string,
+  ) {
+    await user.type(within(dialog).getByLabelText('New quote'), text)
+    await user.type(within(dialog).getByLabelText('Quote author'), author)
+    await user.click(within(dialog).getByRole('button', { name: 'Add quote' }))
+  }
+
+  it('adds your own quotes and can show only those', async () => {
+    const user = userEvent.setup()
+    const { unmount } = render(<App />)
+    const dialog = await openQuoteSettings(user)
+
+    await user.click(within(dialog).getByRole('button', { name: 'Add quote' }))
+    expect(within(dialog).getByRole('alert')).toHaveTextContent(
+      'Write the quote first',
+    )
+
+    await addQuote(user, dialog, 'Ship small things.', 'Me')
+    expect(within(dialog).getByText('Ship small things.')).toBeInTheDocument()
+    await user.click(
+      within(dialog).getByLabelText('Include the built-in quotes'),
+    )
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Close settings' }),
+    )
+    expect(cardText()).toBe('“Ship small things.”')
+    expect(document.querySelector('.quote-card__author')).toHaveTextContent(
+      '— Me',
+    )
+
+    unmount()
+    render(<App />)
+    expect(cardText()).toBe('“Ship small things.”')
+  })
+
+  it('follows your arranged order and deletes your quotes', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    const dialog = await openQuoteSettings(user)
+    await addQuote(user, dialog, 'Alpha', 'A')
+    await addQuote(user, dialog, 'Beta', 'B')
+    await user.click(
+      within(dialog).getByLabelText('Include the built-in quotes'),
+    )
+    await user.click(within(dialog).getByLabelText('My order'))
+    // Arrange Beta before Alpha.
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Move "Beta" up' }),
+    )
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Close settings' }),
+    )
+
+    const first = cardText()
+    await user.click(screen.getByRole('button', { name: 'Next quote' }))
+    const second = cardText()
+    expect([first, second].sort()).toEqual(['“Alpha”', '“Beta”'])
+    await user.click(screen.getByRole('button', { name: 'Next quote' }))
+    expect(cardText()).toBe(first) // loops in the arranged order
+
+    await openQuoteSettings(user)
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Delete "Alpha"' }),
+    )
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Delete "Beta"' }),
+    )
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Close settings' }),
+    )
+    expect(screen.getByText(/No quotes in rotation/)).toBeInTheDocument()
+  })
+
+  it('rotates on a timer and pauses while hovered', () => {
+    localStorage.setItem(
+      'todoapp.quoteLibrary.v1',
+      JSON.stringify({
+        items: [
+          {
+            id: 'a',
+            text: 'Alpha',
+            author: 'A',
+            builtIn: false,
+            enabled: true,
+          },
+          { id: 'b', text: 'Beta', author: 'B', builtIn: false, enabled: true },
+        ],
+        order: 'custom',
+        includeBuiltIn: false,
+        rotate: true,
+        intervalSec: 15,
+      }),
+    )
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+    render(<App />)
+    expect(cardText()).toBe('“Alpha”')
+
+    act(() => {
+      vi.advanceTimersByTime(14_000)
+    })
+    expect(cardText()).toBe('“Alpha”')
+    act(() => {
+      vi.advanceTimersByTime(1_000)
+    })
+    expect(cardText()).toBe('“Beta”')
+
+    fireEvent.mouseEnter(document.querySelector('.quote-card')!)
+    act(() => {
+      vi.advanceTimersByTime(60_000)
+    })
+    expect(cardText()).toBe('“Beta”')
+    fireEvent.mouseLeave(document.querySelector('.quote-card')!)
+    act(() => {
+      vi.advanceTimersByTime(15_000)
+    })
+    expect(cardText()).toBe('“Alpha”')
+  })
+})
+
 describe('music player', () => {
   it('is hidden for now, including its setting', async () => {
     const user = userEvent.setup()
