@@ -36,8 +36,10 @@ export function useRough(draw: RoughDraw, redrawKey: unknown = null) {
     if (!svg) return
     const rc = rough.svg(svg)
     // ResizeObserver also fires once right after observe(), which does the first draw.
-    const observer = new ResizeObserver(() => {
-      const { width, height } = svg.getBoundingClientRect()
+    const observer = new ResizeObserver(([entry]) => {
+      // contentRect is the layout size, unaffected by CSS transforms. (The bounding
+      // rect of a rotated element is taller, which drew outlines past the box.)
+      const { width, height } = entry.contentRect
       if (width === 0 || height === 0) return
       svg.replaceChildren(...[drawRef.current(rc, width, height)].flat())
     })

@@ -1,3 +1,4 @@
+import type { DateKey } from '../lib/date.ts'
 import type { Todo } from '../types/todo.ts'
 
 export type TodoAction =
@@ -19,19 +20,20 @@ export function todoReducer(todos: Todo[], action: TodoAction): Todo[] {
 }
 
 // Kept outside the reducer so the reducer stays pure (no random ids / clock).
-export function createTodo(title: string): Todo {
+export function createTodo(title: string, date: DateKey): Todo {
   return {
     id: crypto.randomUUID(),
     title,
     done: false,
+    date,
     createdAt: new Date().toISOString(),
   }
 }
 
-export function sampleTodos(): Todo[] {
+export function sampleTodos(date: DateKey): Todo[] {
   return [
-    { ...createTodo('Sketch out the to-do app'), done: true },
-    createTodo('Try ticking this box'),
-    createTodo('Add something of your own above'),
+    { ...createTodo('Sketch out the to-do app', date), done: true },
+    createTodo('Try ticking this box', date),
+    createTodo('Add something of your own above', date),
   ]
 }

@@ -24,6 +24,20 @@
   padding: calc(var(--space) * 3);
 }
 
+/* The fill is drawn in the svg, which must then sit behind the content. */
+.sketch-box--filled {
+  isolation: isolate;
+  color: var(--ink);
+}
+
+.sketch-box--filled > .sketch-svg {
+  z-index: -1;
+}
+
+.sketch-box__fill {
+  fill: var(--marker);
+}
+
 .sketch-button {
   display: inline-flex;
   align-items: center;
@@ -64,6 +78,12 @@
   color: var(--ink);
 }
 
+/* Icon buttons don't shift when pressed: on a small target the shift could
+   move it out from under the pointer and the click would be lost. */
+.sketch-button--ghost:active {
+  transform: none;
+}
+
 .sketch-input {
   width: 100%;
   min-width: 0;
@@ -95,6 +115,10 @@
   outline-offset: 4px;
 }
 
+.sketch-checkbox:has(input:disabled) {
+  cursor: default;
+}
+
 .sketch-checkbox__tick path {
   stroke: var(--accent);
 }
@@ -114,4 +138,70 @@
 .sketch-strike {
   position: relative;
   display: inline-block;
+}
+
+.sketch-progress {
+  position: relative;
+  height: 14px;
+}
+
+.sketch-progress__track path {
+  stroke: var(--pencil);
+}
+
+.sketch-progress__fill path {
+  stroke: var(--accent);
+}
+
+/* Invisible native slider on top of the drawing: keyboard, touch and screen readers for free. */
+.sketch-progress__input {
+  position: absolute;
+  inset: -4px 0;
+  width: 100%;
+  height: calc(100% + 8px);
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.sketch-progress__input:disabled {
+  cursor: default;
+}
+
+.sketch-progress--seek:has(.sketch-progress__input:focus-visible) {
+  outline: 2px dashed var(--accent);
+  outline-offset: 3px;
+}
+
+/* Hand-drawn-looking scrollbar, always visible when the list overflows. */
+.sketch-scroll {
+  overscroll-behavior: contain;
+}
+
+.sketch-scroll::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+.sketch-scroll::-webkit-scrollbar-track {
+  border-left: 1.5px dashed var(--level-2);
+  background: transparent;
+}
+
+.sketch-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid var(--ink);
+  border-radius: 8px 3px 8px 3px;
+  background: var(--marker);
+}
+
+.sketch-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--level-2);
+}
+
+/* Browsers without ::-webkit-scrollbar (Firefox): the standard properties. */
+@supports not selector(::-webkit-scrollbar) {
+  .sketch-scroll {
+    scrollbar-color: var(--ink) var(--level-0);
+    scrollbar-width: thin;
+  }
 }

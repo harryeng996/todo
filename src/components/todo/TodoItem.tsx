@@ -6,7 +6,12 @@ import { SketchCheckbox } from '../sketch/SketchCheckbox.tsx'
 import { SketchStrike } from '../sketch/SketchStrike.tsx'
 import { seedFrom } from '../sketch/useRough.ts'
 
-export function TodoItem({ todo }: { todo: Todo }) {
+interface TodoItemProps {
+  todo: Todo
+  editable: boolean
+}
+
+export function TodoItem({ todo, editable }: TodoItemProps) {
   const { dispatch } = useTodos()
   const seed = seedFrom(todo.id)
 
@@ -16,6 +21,7 @@ export function TodoItem({ todo }: { todo: Todo }) {
         checked={todo.done}
         onChange={() => dispatch({ type: 'toggle', id: todo.id })}
         label={todo.title}
+        disabled={!editable}
         seed={seed}
       />
       <span className="todo-item__title">
@@ -23,14 +29,16 @@ export function TodoItem({ todo }: { todo: Todo }) {
           {todo.title}
         </SketchStrike>
       </span>
-      <SketchButton
-        variant="ghost"
-        className="todo-item__delete"
-        onClick={() => dispatch({ type: 'delete', id: todo.id })}
-        aria-label={`Delete "${todo.title}"`}
-      >
-        <X size={20} strokeWidth={1.75} aria-hidden="true" />
-      </SketchButton>
+      {editable && (
+        <SketchButton
+          variant="ghost"
+          className="todo-item__delete"
+          onClick={() => dispatch({ type: 'delete', id: todo.id })}
+          aria-label={`Delete "${todo.title}"`}
+        >
+          <X size={20} strokeWidth={1.75} aria-hidden="true" />
+        </SketchButton>
+      )}
     </li>
   )
 }

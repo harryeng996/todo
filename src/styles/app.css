@@ -1,28 +1,497 @@
 .page {
-  max-width: 36rem;
-  margin: 0 auto;
-  padding: calc(var(--space) * 6) calc(var(--space) * 2);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 3);
+  padding: calc(var(--space) * 5) calc(var(--space) * 2);
 }
 
-.page__header {
+.page__clock {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 1.5);
+  padding-block: var(--space) calc(var(--space) * 2);
+}
+
+.page__media {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 3);
+}
+
+/* Phones: one column. The centre column's parts join the page flow so the
+   to-do list can sit right under the grid. */
+.page__center,
+.page__grid-row {
+  display: contents;
+}
+
+/* Phone order only; on wider screens the columns keep source order. */
+@media (max-width: 899px) {
+  .page__clock {
+    order: 1;
+  }
+
+  .page__grid {
+    order: 2;
+  }
+
+  .page__todo {
+    order: 3;
+  }
+
+  .page__weight {
+    order: 4;
+  }
+
+  .page__quote {
+    order: 5;
+  }
+
+  .page__media {
+    order: 6;
+  }
+}
+
+/* Tablets: to-do list (and weight below it) on the left, the rest on the right. */
+@media (min-width: 900px) {
+  .page {
+    display: grid;
+    grid-template-areas:
+      'todo center'
+      'weight center';
+    grid-template-columns: minmax(16rem, 1fr) minmax(0, 2fr);
+    align-items: start;
+    padding: calc(var(--space) * 4) calc(var(--space) * 3);
+  }
+
+  .page__todo {
+    grid-area: todo;
+  }
+
+  .page__weight {
+    grid-area: weight;
+  }
+
+  .page__center {
+    display: flex;
+    flex-direction: column;
+    grid-area: center;
+    gap: calc(var(--space) * 3);
+    min-width: 0;
+  }
+
+  /* Grid | quote and video | links share the same two equal columns, so the
+     centre lines up as a symmetric 2×2 block. */
+  .page__grid-row,
+  .page__media {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: calc(var(--space) * 3);
+  }
+
+  /* The card is laid over its slot so the row's height comes from the grid;
+     the quote's text then shrinks to fit (useFitText) instead of growing it. */
+  .page__quote {
+    position: relative;
+    min-height: 12rem;
+  }
+
+  .page__quote > .quote-card {
+    position: absolute;
+    inset: 0;
+    height: auto;
+  }
+}
+
+/* Desktop: full width, to-do list | clock, grid, quote, media | weight.
+   The page is at least one screen tall: columns stretch to the bottom, and
+   the music/video row takes the centre column's spare height. */
+@media (min-width: 1200px) {
+  /* Weight history fills the rest of the full-height weight column and
+     scrolls inside; a zero flex-basis keeps a long list from stretching it. */
+  .weight > .history {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .weight > .history .history__list {
+    flex: 1 1 0;
+    min-height: 12rem;
+    max-height: none;
+  }
+
+  .page__media {
+    flex: 1;
+  }
+
+  /* Media boxes fill the height they're given: the player sits centred,
+     the link list grows (and scrolls) with the form kept at the bottom. */
+  .youtube,
+  .youtube-links {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .youtube__player {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* Takes the room left in the box; the frame is the largest 16:9 that fits,
+     so extra targets under the clock shrink the video instead of the page growing. */
+  .youtube__screen {
+    display: grid;
+    flex: 1 1 0;
+    place-items: center;
+    min-height: 8rem;
+    container-type: size;
+  }
+
+  .youtube__screen .youtube__frame {
+    width: min(100cqw, 100cqh * 16 / 9);
+  }
+
+  .youtube-links .youtube__list {
+    flex: 1 1 0;
+    min-height: 4rem; /* two rows; the rest of the list scrolls */
+    max-height: none;
+  }
+
+  .youtube-links .youtube__form {
+    margin-top: auto;
+  }
+
+  .page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    grid-template-areas: 'todo center weight';
+    /* Equal side columns either side of the centre. */
+    grid-template-columns: minmax(17rem, 1fr) minmax(0, 2.6fr) minmax(
+        17rem,
+        1fr
+      );
+    align-items: stretch;
+  }
+
+  .page--no-weight {
+    grid-template-areas: 'todo center';
+    grid-template-columns: minmax(17rem, 1fr) minmax(0, 3.6fr);
+  }
+}
+
+/* Clock + countdown */
+
+.clock {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space) calc(var(--space) * 3);
+}
+
+.clock__time {
+  font-size: clamp(3.5rem, 14vw, 8rem);
+  line-height: 1;
+}
+
+.clock__digit {
+  display: inline-block;
+  width: 0.55em;
+  text-align: center;
+}
+
+.clock__colon {
+  display: inline-block;
+  position: relative;
+  top: -0.06em;
+  width: 0.3em;
+  text-align: center;
+}
+
+.clock__date {
+  color: var(--pencil);
+  font-size: 1.5rem;
+}
+
+.countdowns {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.countdowns__add {
+  align-self: flex-start;
+}
+
+.countdown {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space) calc(var(--space) * 2);
+  min-height: 2.5rem;
+}
+
+.countdown__title {
+  font-size: 1.35rem;
+}
+
+.countdown__line {
+  flex: 1 1 12rem;
+}
+
+.countdown__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  color: var(--pencil);
+  white-space: nowrap;
+}
+
+.target-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  align-items: end;
+  gap: var(--space) calc(var(--space) * 2);
+}
+
+.target-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--pencil);
+  font-size: 1rem;
+}
+
+.target-form__actions,
+.target-form__error {
+  grid-column: 1 / -1;
+}
+
+.target-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space);
+}
+
+.target-form__error {
+  color: var(--danger);
+}
+
+@media (max-width: 640px) {
+  .target-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .target-form__field--wide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Day grid */
+
+.day-grid-panel__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space) calc(var(--space) * 2);
+  margin-bottom: var(--space);
+}
+
+.day-grid-panel__heading {
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.day-grid-panel__range {
+  color: var(--pencil);
+  font-size: 1rem;
+}
+
+.grid-filter {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space);
+}
+
+.grid-filter__select {
+  padding: 4px calc(var(--space) * 1.25);
+  background: var(--paper);
+  font: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.grid-filter__custom {
+  display: flex;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space);
+}
+
+.grid-filter__field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pencil);
+  font-size: 1rem;
+}
+
+.grid-filter__field .sketch-input {
+  width: auto;
+  padding: 2px var(--space);
+  font-size: 1rem;
+}
+
+.grid-filter__error {
+  flex-basis: 100%;
+  color: var(--danger);
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+/* Grid and legend share one width, centred in the box (scrolls if narrower). */
+.day-grid__body {
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+/* On phones the grid scrolls sideways; rtl makes it start at the right end (today). */
+.day-grid__scroll {
+  direction: rtl;
+  overflow-x: auto;
+  padding: 6px 4px 8px; /* room for the selection circle */
+}
+
+.day-grid {
+  --cell: 12px;
+  --gap: 3px;
+  position: relative;
+  display: grid;
+  grid-template-columns: 2rem repeat(var(--weeks, 53), var(--cell));
+  grid-template-rows: 1.1rem repeat(7, var(--cell));
+  gap: var(--gap);
+  direction: ltr;
+  width: max-content;
+  margin-right: auto; /* stay left-aligned when it fits (the scroller is rtl) */
+  color: var(--pencil);
+  font-size: 0.8rem;
+}
+
+.day-grid__row {
+  display: contents;
+}
+
+.day-grid__month {
+  grid-row: 1;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.day-grid__weekday {
+  grid-column: 1;
+  font-size: 0.75rem;
+  line-height: var(--cell);
+}
+
+.day-grid__cell {
+  display: block;
+  width: var(--cell);
+  height: var(--cell);
+  border-radius: 2px;
+  background: var(--level-0);
+}
+
+.day-grid [data-date] {
+  cursor: pointer;
+}
+
+.day-grid [data-date]:hover {
+  outline: 1px solid var(--pencil);
+}
+
+.day-grid [data-date]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.day-grid__cell--l1 {
+  background: var(--level-1);
+}
+
+.day-grid__cell--l2 {
+  background: var(--level-2);
+}
+
+.day-grid__cell--l3 {
+  background: var(--level-3);
+}
+
+.day-grid__cell--l4 {
+  background: var(--level-4);
+}
+
+.day-grid__cell--today {
+  border: 1.5px solid var(--ink);
+}
+
+.day-grid .sketch-svg {
+  color: var(--ink);
+}
+
+.day-grid__legend {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+  color: var(--pencil);
+  font-size: 0.85rem;
+}
+
+.day-grid__legend .day-grid__cell {
+  --cell: 12px;
+}
+
+/* Todo panel */
+
+.todo-panel__header {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--space);
-  margin-bottom: calc(var(--space) * 4);
+  margin-bottom: calc(var(--space) * 3);
 }
 
-.page__title {
-  display: flex;
-  align-items: center;
-  gap: var(--space);
-  font-size: 2.5rem;
+.todo-panel__heading {
+  font-size: 2rem;
   font-weight: 400;
 }
 
-.page__count {
+.todo-panel__count {
   color: var(--pencil);
+}
+
+.todo-panel__readonly {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+}
+
+.todo-panel__tag {
+  padding: 0 var(--space);
+  border: 1.5px dashed var(--pencil);
+  border-radius: 4px;
+  color: var(--pencil);
+  font-size: 1rem;
 }
 
 .todo-input {
@@ -64,4 +533,753 @@
 
 .todo-item__delete:hover {
   color: var(--danger);
+}
+
+/* Quote */
+
+.quote-card {
+  /* A fixed height: the text shrinks to fit it (useFitText) rather than growing the card. */
+  display: flex;
+  flex-direction: column;
+  height: 12rem;
+  padding: calc(var(--space) * 3.5) calc(var(--space) * 6)
+    calc(var(--space) * 3) calc(var(--space) * 4);
+  /* A slight tilt; the note spans the centre column, so more would crowd its neighbours. */
+  transform: rotate(-0.4deg);
+}
+
+.quote-card__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin: 0;
+  animation: quote-in 250ms ease-out;
+}
+
+/* Takes the space left above the author; useFitText sets the font size.
+   `safe center`: short quotes sit in the middle, overflow (if any) stays measurable. */
+.quote-card__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: safe center;
+  min-height: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: 1.875rem;
+  line-height: 1.35;
+}
+
+.quote-card__author {
+  flex: none;
+  margin-top: var(--space);
+  font-size: 1.05rem;
+  text-align: right;
+}
+
+.quote-card__next {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: var(--ink);
+}
+
+@keyframes quote-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* Music */
+
+.music__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  margin-bottom: var(--space);
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.music__title {
+  overflow: hidden;
+  font-size: 1.3rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.music__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space);
+  margin: var(--space) 0;
+}
+
+.music__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space);
+  color: var(--pencil);
+  font-size: 1rem;
+}
+
+.music__volume {
+  display: flex;
+  align-items: center;
+}
+
+.music__volume input {
+  width: 6rem;
+  accent-color: var(--ink);
+}
+
+.music__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space);
+  color: var(--pencil);
+}
+
+.playlist {
+  margin-top: var(--space);
+  font-size: 1rem;
+}
+
+.playlist__summary {
+  color: var(--pencil);
+  cursor: pointer;
+}
+
+.playlist__summary svg {
+  margin-right: 4px;
+  vertical-align: -3px;
+}
+
+.playlist__tracks {
+  max-height: 14rem;
+  margin: var(--space) 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.playlist__track {
+  width: 100%;
+  padding: 2px 6px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.playlist__track:hover {
+  background: var(--level-0);
+}
+
+.playlist__track--current {
+  background: var(--marker);
+}
+
+.playlist__track--failed {
+  color: var(--pencil);
+  text-decoration: line-through;
+}
+
+.playlist__folder {
+  color: var(--pencil);
+}
+
+.playlist__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.playlist__note {
+  color: var(--pencil);
+  font-size: 0.9rem;
+}
+
+.page__clock-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space);
+}
+
+.page__clock-row .clock {
+  flex: 1;
+}
+
+/* Settings dialog */
+
+.settings {
+  width: min(28rem, calc(100vw - 32px));
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  overflow: visible;
+}
+
+.settings::backdrop {
+  background: rgb(31 31 31 / 0.25);
+}
+
+.settings__box {
+  background: var(--paper);
+}
+
+.settings__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space);
+}
+
+.settings__header h2 {
+  font-size: 1.75rem;
+  font-weight: 400;
+}
+
+.settings__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  margin: 0 0 calc(var(--space) * 2);
+  padding: 0;
+  border: none;
+}
+
+.settings__group legend {
+  margin-bottom: var(--space);
+  color: var(--pencil);
+}
+
+.settings__toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: calc(var(--space) * 1.5);
+}
+
+.settings__toggle label {
+  cursor: pointer;
+}
+
+.settings__hint {
+  display: block;
+  color: var(--pencil);
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.settings__plus,
+.weight__plus {
+  padding: 0 6px;
+  border-radius: 4px;
+  background: var(--marker);
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+
+.settings__unit {
+  display: flex;
+  gap: calc(var(--space) * 2);
+  padding-left: calc(24px + var(--space) * 1.5);
+}
+
+.settings__radio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.settings__radio input {
+  accent-color: var(--ink);
+}
+
+.settings__note {
+  color: var(--pencil);
+  font-size: 0.95rem;
+}
+
+/* Weight */
+
+.weight {
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--space) * 2);
+}
+
+.weight__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+}
+
+.weight__heading {
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.weight__add-photo {
+  margin-left: auto;
+}
+
+.weight__value-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  min-height: 3rem;
+}
+
+.weight__value {
+  font-size: 2.25rem;
+  line-height: 1;
+}
+
+.weight__none {
+  color: var(--pencil);
+  font-size: 1.25rem;
+}
+
+.weight__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px var(--space);
+  min-height: 3rem;
+}
+
+.weight__input {
+  width: 6.5rem;
+}
+
+.weight__unit {
+  color: var(--pencil);
+}
+
+.weight__remove:hover {
+  color: var(--danger);
+}
+
+.weight__error {
+  flex-basis: 100%;
+  color: var(--danger);
+}
+
+.weight__status {
+  color: var(--pencil);
+  font-size: 1rem;
+}
+
+.weight__thumb {
+  margin-left: auto;
+  padding: 0;
+  border: var(--stroke) solid var(--ink);
+  border-radius: 4px;
+  background: none;
+  cursor: zoom-in;
+  line-height: 0;
+}
+
+.weight__thumb img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+/* The chart and comparisons follow each section's content (not pinned to the
+   column bottom, which can be below the fold). */
+.page__weight,
+.page__todo {
+  display: flex;
+  flex-direction: column;
+}
+
+.page__weight > .weight,
+.page__todo > .todo-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.weight__trend,
+.todo-stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  padding-top: calc(var(--space) * 3);
+}
+
+/* Weight history (centre column) */
+
+.weight > .history {
+  padding-top: calc(var(--space) * 2);
+  border-top: 1.5px dashed var(--level-1);
+}
+
+.history__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  margin-bottom: var(--space);
+  font-size: 1.15rem;
+  font-weight: 400;
+}
+
+.history__count {
+  margin-left: auto;
+  color: var(--pencil);
+  font-size: 1rem;
+}
+
+.history__empty {
+  color: var(--pencil);
+}
+
+.history__list {
+  max-height: 20rem;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  font-size: 1rem;
+}
+
+.history__item {
+  border-bottom: 1px dashed var(--level-1);
+}
+
+.history__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+}
+
+.history__row {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 1fr auto 3.5rem;
+  align-items: baseline;
+  gap: var(--space);
+  padding: 6px;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.history__row:hover {
+  background: var(--level-0);
+}
+
+.history__item--open .history__row {
+  background: var(--marker);
+}
+
+.history__kg {
+  font-size: 1.1rem;
+}
+
+.history__change {
+  color: var(--pencil);
+  text-align: right;
+}
+
+.history__thumb {
+  padding: 0;
+  border: 1.5px solid var(--ink);
+  border-radius: 3px;
+  background: none;
+  cursor: zoom-in;
+  line-height: 0;
+}
+
+.history__thumb img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.history__edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space) 6px calc(var(--space) * 1.5);
+}
+
+.history__photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+/* Comparison text under the to-do and weight charts */
+
+.stats {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--pencil);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.stats strong {
+  color: var(--ink);
+  font-weight: 400;
+}
+
+/* Scrollable line charts */
+
+.scroll-chart {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.scroll-chart__axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-block: 2px 1.6rem;
+  color: var(--pencil);
+  font-size: 0.8rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* rtl: opens scrolled to the right end (today). */
+.scroll-chart__scroll {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 4px;
+  overflow-x: auto;
+  direction: rtl;
+}
+
+.scroll-chart__content {
+  margin-right: auto;
+  direction: ltr;
+}
+
+.scroll-chart__plot {
+  position: relative;
+  color: var(--ink);
+}
+
+.scroll-chart__plot .scroll-chart__selected path {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+.scroll-chart__ticks {
+  position: relative;
+  height: 1.2rem;
+  color: var(--pencil);
+  font-size: 0.75rem;
+}
+
+.scroll-chart__ticks span {
+  position: absolute;
+  top: 2px;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.scroll-chart__ticks span:last-child {
+  transform: translateX(-85%);
+}
+
+.scroll-chart__empty {
+  color: var(--pencil);
+  font-size: 1rem;
+}
+
+/* Photo preview dialog */
+
+.photo-preview {
+  width: min(56rem, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  overflow: visible;
+}
+
+.photo-preview::backdrop {
+  background: rgb(31 31 31 / 0.45);
+}
+
+.photo-preview__box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  background: var(--paper);
+}
+
+.photo-preview__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.photo-preview__title {
+  display: flex;
+  align-items: baseline;
+  gap: calc(var(--space) * 1.5);
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+.photo-preview__kg {
+  color: var(--pencil);
+  font-size: 1.15rem;
+}
+
+.photo-preview__image {
+  display: block;
+  width: 100%;
+  max-height: calc(100vh - 220px);
+  object-fit: contain;
+  border: var(--stroke) solid var(--ink);
+  border-radius: 4px;
+  background: var(--level-0);
+}
+
+.photo-preview__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.photo-preview__spacer {
+  flex: 1;
+}
+
+.photo-preview__remove:hover {
+  color: var(--danger);
+}
+
+/* YouTube */
+
+.youtube__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space);
+  margin-bottom: var(--space);
+  font-size: 1.25rem;
+  font-weight: 400;
+}
+
+.youtube__frame {
+  aspect-ratio: 16 / 9;
+  border: var(--stroke) solid var(--ink);
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--level-0);
+}
+
+.youtube__frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.youtube__count {
+  margin-left: auto;
+  color: var(--pencil);
+  font-size: 1rem;
+}
+
+.youtube__empty {
+  padding: calc(var(--space) * 4) 0;
+  color: var(--pencil);
+  text-align: center;
+}
+
+.youtube-links .youtube__list {
+  max-height: 18rem;
+  margin-top: 0;
+  overflow-y: auto;
+}
+
+.youtube__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  color: var(--pencil);
+  font-size: 0.95rem;
+}
+
+.youtube__list {
+  margin: var(--space) 0;
+  padding: 0;
+  list-style: none;
+  font-size: 1rem;
+}
+
+.youtube__item {
+  display: flex;
+  align-items: center;
+}
+
+.youtube__select {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 6px;
+  overflow: hidden;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.youtube__select:hover {
+  background: var(--level-0);
+}
+
+.youtube__select--current {
+  background: var(--marker);
+}
+
+.youtube__remove {
+  padding: 6px;
+}
+
+.youtube__remove:hover {
+  color: var(--danger);
+}
+
+.youtube__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space);
+  margin-top: var(--space);
+}
+
+.youtube__form-row {
+  display: flex;
+  gap: var(--space);
+}
+
+.youtube__error {
+  color: var(--danger);
+  font-size: 1rem;
 }

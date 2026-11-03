@@ -1,7 +1,6 @@
 # To-do (sketch style)
 
-A small single-page to-do app with a hand-drawn look. Stack and structure are described in
-[tech-stack-choosing-plan.md](tech-stack-choosing-plan.md).
+A small single-page to-do app with a hand-drawn look.
 
 ## Run
 
@@ -21,4 +20,6 @@ pnpm dev        # http://localhost:5173
 | `pnpm lint`    | Lint with oxlint                      |
 | `pnpm format`  | Format with Prettier                  |
 
-Todos are saved in the browser's `localStorage` (key `todoapp.todos.v1`).
+Everything is saved in the browser: todos, target, quote position and player settings live in
+`localStorage`
+The music folder is read in place and never copied. Chrome/Edge remember the folder; Firefox asks again each visit.

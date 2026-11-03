@@ -6,6 +6,13 @@
   --marker: #ffe58a; /* flat highlighter fill, used sparingly */
   --danger: #c0392b; /* delete */
 
+  /* Day grid: flat tints of --accent, one per level (no gradients). */
+  --level-0: #ecebe6;
+  --level-1: #c9d9ea;
+  --level-2: #93b3d4;
+  --level-3: #5f8dbd;
+  --level-4: #3b6ea5;
+
   --font-hand: 'Patrick Hand', 'Comic Neue', system-ui, sans-serif;
   --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
 

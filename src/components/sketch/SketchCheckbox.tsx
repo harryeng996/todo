@@ -5,6 +5,9 @@ interface SketchCheckboxProps {
   onChange: (checked: boolean) => void
   /** Accessible name for the checkbox. */
   label: string
+  disabled?: boolean
+  /** Lets a visible <label htmlFor> elsewhere toggle it. */
+  id?: string
   seed?: number
 }
 
@@ -13,6 +16,8 @@ export function SketchCheckbox({
   checked,
   onChange,
   label,
+  disabled = false,
+  id,
   seed = 1,
 }: SketchCheckboxProps) {
   const svgRef = useRough((rc, width, height) => {
@@ -37,8 +42,10 @@ export function SketchCheckbox({
     <label className="sketch-checkbox">
       <input
         type="checkbox"
+        id={id}
         className="visually-hidden"
         checked={checked}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.checked)}
         aria-label={label}
       />

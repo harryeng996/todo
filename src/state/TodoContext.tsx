@@ -1,26 +1,24 @@
 import { useEffect, useReducer, type ReactNode } from 'react'
-import { localStorageRepository, type TodoRepository } from '../lib/storage.ts'
-import { sampleTodos, todoReducer } from './todoReducer.ts'
+import type { JsonStore } from '../lib/storage.ts'
+import type { Todo } from '../types/todo.ts'
+import { todoReducer } from './todoReducer.ts'
+import { todoStore } from './todoStore.ts'
 import { TodoContext } from './useTodos.ts'
 
 interface TodoProviderProps {
   children: ReactNode
-  repository?: TodoRepository
+  store?: JsonStore<Todo[]>
 }
 
 export function TodoProvider({
   children,
-  repository = localStorageRepository,
+  store = todoStore,
 }: TodoProviderProps) {
-  const [todos, dispatch] = useReducer(
-    todoReducer,
-    repository,
-    (repo) => repo.load() ?? sampleTodos(),
-  )
+  const [todos, dispatch] = useReducer(todoReducer, store, (s) => s.load())
 
   useEffect(() => {
-    repository.save(todos)
-  }, [todos, repository])
+    store.save(todos)
+  }, [todos, store])
 
   return <TodoContext value={{ todos, dispatch }}>{children}</TodoContext>
 }

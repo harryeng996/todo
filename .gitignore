@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+notes.txt
+feature-plan.md
+feature-plan-2.md
+tech-stack-choosing-plan.md

@@ -1,11 +1,12 @@
 import { Plus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
+import type { DateKey } from '../../lib/date.ts'
 import { useTodos } from '../../state/useTodos.ts'
 import { createTodo } from '../../state/todoReducer.ts'
 import { SketchButton } from '../sketch/SketchButton.tsx'
 import { SketchInput } from '../sketch/SketchInput.tsx'
 
-export function TodoInput() {
+export function TodoInput({ date }: { date: DateKey }) {
   const { dispatch } = useTodos()
   const [title, setTitle] = useState('')
 
@@ -13,7 +14,7 @@ export function TodoInput() {
     event.preventDefault()
     const trimmed = title.trim()
     if (!trimmed) return
-    dispatch({ type: 'add', todo: createTodo(trimmed) })
+    dispatch({ type: 'add', todo: createTodo(trimmed, date) })
     setTitle('')
   }
 
