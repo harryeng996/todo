@@ -21,7 +21,7 @@ import { usePomodoro } from '../../state/usePomodoro.ts'
 import { useTodos } from '../../state/useTodos.ts'
 import { SketchBox } from '../sketch/SketchBox.tsx'
 import { SketchButton } from '../sketch/SketchButton.tsx'
-import { SketchProgress } from '../sketch/SketchProgress.tsx'
+import { SketchRing } from '../sketch/SketchRing.tsx'
 
 /** The current time, updated twice a second while `active`. */
 function useNowWhile(active: boolean): number {
@@ -124,29 +124,29 @@ export function PomodoroCard({
         ))}
       </div>
 
-      <div className="pomodoro__clock">
-        <time
-          className="pomodoro__time"
-          aria-label={`${phaseLabel(timer.phase)}: ${countdown} left`}
-        >
-          {[...countdown].map((char, i) => (
-            <span
-              key={i}
-              className={char === ':' ? 'clock__colon' : 'clock__digit'}
-            >
-              {char}
-            </span>
-          ))}
-        </time>
-        <SketchProgress
+      <div className="pomodoro__clock" data-phase={timer.phase}>
+        <SketchRing
+          className="pomodoro__ring"
           value={1 - left / total}
           label={`${phaseLabel(timer.phase)} progress`}
+          valueText={`${countdown} left`}
           seed={91}
-        />
-        <p className="pomodoro__cycle">
-          {phaseLabel(timer.phase)} · {Math.min(setPosition, config.longEvery)}{' '}
-          of {config.longEvery} before a long break
-        </p>
+        >
+          <time className="pomodoro__time">
+            {[...countdown].map((char, i) => (
+              <span
+                key={i}
+                className={char === ':' ? 'clock__colon' : 'clock__digit'}
+              >
+                {char}
+              </span>
+            ))}
+          </time>
+          <span className="pomodoro__cycle">
+            {phaseLabel(timer.phase)} ·{' '}
+            {Math.min(setPosition, config.longEvery)}/{config.longEvery}
+          </span>
+        </SketchRing>
       </div>
 
       {timer.phase === 'focus' && (

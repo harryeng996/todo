@@ -155,6 +155,18 @@
     width: min(100cqw, 100cqh * 16 / 9);
   }
 
+  /* The ring is the largest circle that fits the card's spare room. */
+  .pomodoro__clock {
+    flex: 1 1 0;
+    min-height: 9rem;
+    container-type: size;
+  }
+
+  /* More specific than the base rule further down, which would otherwise win. */
+  .pomodoro__clock .pomodoro__ring {
+    width: min(100cqw, 100cqh);
+  }
+
   .page {
     min-height: 100vh;
     min-height: 100dvh;
@@ -1455,24 +1467,45 @@
 .pomodoro__clock {
   display: flex;
   flex: 1;
-  flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: var(--space);
   padding: var(--space) 0;
 }
 
+/* Square ring; on desktop it fills the room the card has (see the 1200px rules). */
+.pomodoro__ring {
+  width: min(100%, 15rem);
+  aspect-ratio: 1;
+}
+
 .pomodoro__time {
-  align-self: center;
-  font-size: clamp(3rem, 5vw, 4.5rem);
+  font-size: clamp(2rem, 21cqi, 4.5rem);
   line-height: 1;
   white-space: nowrap;
 }
 
-.pomodoro__cycle,
+.pomodoro__cycle {
+  margin-top: 4px;
+  color: var(--pencil);
+  font-size: clamp(0.8rem, 6cqi, 1rem);
+}
+
 .pomodoro__today {
   color: var(--pencil);
   font-size: 0.95rem;
   text-align: center;
+}
+
+/* Breaks get a lighter arc than focus. */
+.pomodoro__clock[data-phase='short'] .sketch-ring__arc path,
+.pomodoro__clock[data-phase='long'] .sketch-ring__arc path {
+  stroke: var(--level-3);
+}
+
+.pomodoro__clock[data-phase='short'] .sketch-ring__tip path,
+.pomodoro__clock[data-phase='long'] .sketch-ring__tip path {
+  fill: var(--level-3);
+  stroke: var(--level-3);
 }
 
 .pomodoro__task {

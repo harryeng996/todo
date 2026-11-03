@@ -205,3 +205,35 @@
     scrollbar-width: thin;
   }
 }
+
+/* Clock-face ring (SketchRing): text sits in the middle and scales with it. */
+.sketch-ring {
+  position: relative;
+  container-type: inline-size;
+}
+
+.sketch-ring__center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.sketch-ring__track path {
+  stroke: var(--level-2);
+}
+
+.sketch-ring__tick path {
+  stroke: var(--pencil);
+}
+
+.sketch-ring__arc path {
+  stroke: var(--accent);
+}
+
+.sketch-ring__tip path {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
