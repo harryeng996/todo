@@ -6,6 +6,9 @@ import './styles/base.css'
 import './styles/sketch.css'
 import './styles/app.css'
 import App from './App.tsx'
+import { registerServiceWorker } from './pwa/register.ts'
+
+registerServiceWorker()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
