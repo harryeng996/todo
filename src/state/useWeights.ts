@@ -1,18 +1,17 @@
 import { createContext, useContext } from 'react'
 import type { DateKey } from '../lib/date.ts'
-import type { WeightLog } from '../lib/weight.ts'
+import type { PhotoKey, WeightLog } from '../lib/weight.ts'
 
 export interface WeightContextValue {
   log: WeightLog
-  /**
-   * Per day, bumped when that day's photo is replaced, so only its object
-   * URLs reload (0 when never replaced).
-   */
-  photoVersions: Readonly<Record<DateKey, number>>
   setWeight: (date: DateKey, kg: number | null) => void
-  setPhoto: (date: DateKey, file: File) => Promise<void>
-  removePhoto: (date: DateKey) => Promise<void>
-  /** Removes the day's weight and photo. */
+  /** Resizes and stores the photo, then adds it to the day; resolves to its key. */
+  addPhoto: (date: DateKey, file: File) => Promise<PhotoKey>
+  /** Swaps one photo for a new one in the same place; resolves to its key. */
+  replacePhoto: (date: DateKey, old: PhotoKey, file: File) => Promise<PhotoKey>
+  removePhoto: (date: DateKey, key: PhotoKey) => Promise<void>
+  removeAllPhotos: (date: DateKey) => Promise<void>
+  /** Removes the day's weight and photos. */
   deleteEntry: (date: DateKey) => Promise<void>
 }
 

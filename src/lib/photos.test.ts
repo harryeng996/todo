@@ -3,7 +3,8 @@ import { clear, createStore, get, set } from 'idb-keyval'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   backfillThumbnails,
-  deletePhoto,
+  deletePhotos,
+  newPhotoKey,
   loadPhoto,
   loadThumbnail,
   resetBackfill,
@@ -23,13 +24,19 @@ beforeEach(async () => {
 
 describe('photo storage', () => {
   it('saves a photo with its thumbnail and deletes both', async () => {
-    await savePhoto('2026-11-01', blob('full'), blob('thumb'))
-    expect(await loadPhoto('2026-11-01')).toBe('full')
-    expect(await loadThumbnail('2026-11-01')).toBe('thumb')
+    const a = newPhotoKey('2026-11-01')
+    const b = newPhotoKey('2026-11-01')
+    expect(a).not.toBe(b)
+    expect(a.startsWith('2026-11-01~')).toBe(true)
+    await savePhoto(a, blob('full-a'), blob('thumb-a'))
+    await savePhoto(b, blob('full-b'), blob('thumb-b'))
+    expect(await loadPhoto(a)).toBe('full-a')
+    expect(await loadThumbnail(b)).toBe('thumb-b')
 
-    await deletePhoto('2026-11-01')
-    expect(await loadPhoto('2026-11-01')).toBeUndefined()
-    expect(await loadThumbnail('2026-11-01')).toBeUndefined()
+    await deletePhotos([a, b])
+    expect(await loadPhoto(a)).toBeUndefined()
+    expect(await loadThumbnail(a)).toBeUndefined()
+    expect(await loadPhoto(b)).toBeUndefined()
   })
 
   it('shows the full photo when an older one has no thumbnail and none can be made', async () => {

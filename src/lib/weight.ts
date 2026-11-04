@@ -2,12 +2,54 @@ import { addDays, type DateKey } from './date.ts'
 
 export type WeightUnit = 'kg' | 'lb'
 
+/** Where a photo is kept in the photo store (see lib/photos.ts). */
+export type PhotoKey = string
+
 export interface WeightEntry {
   kg: number | null
-  hasPhoto: boolean
+  /** The day's photos, in the order added. */
+  photos: PhotoKey[]
 }
 
 export type WeightLog = Record<DateKey, WeightEntry>
+
+/** One photo in a slideshow. */
+export interface Slide {
+  date: DateKey
+  photo: PhotoKey
+}
+
+/** Every photo of `dates` (default: all days, oldest first), each day's in the order added. */
+export function slidesOf(log: WeightLog, dates?: readonly DateKey[]): Slide[] {
+  return (dates ?? Object.keys(log).sort()).flatMap((date) =>
+    (log[date]?.photos ?? []).map((photo) => ({ date, photo })),
+  )
+}
+
+/**
+ * A saved log, read defensively. Logs from when a day had at most one photo
+ * say `hasPhoto`; that photo is kept under the day's date.
+ */
+export function normalizeLog(saved: unknown): WeightLog {
+  const log: WeightLog = {}
+  if (!saved || typeof saved !== 'object') return log
+  for (const [date, value] of Object.entries(saved)) {
+    if (!value || typeof value !== 'object') continue
+    const entry = value as {
+      kg?: unknown
+      photos?: unknown
+      hasPhoto?: unknown
+    }
+    const kg = typeof entry.kg === 'number' ? entry.kg : null
+    const photos = Array.isArray(entry.photos)
+      ? entry.photos.filter((key): key is PhotoKey => typeof key === 'string')
+      : entry.hasPhoto === true
+        ? [date]
+        : []
+    if (kg !== null || photos.length) log[date] = { kg, photos }
+  }
+  return log
+}
 
 const LB_PER_KG = 2.2046226218
 export const MIN_KG = 20

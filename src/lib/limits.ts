@@ -10,3 +10,6 @@ export const MAX_LENGTH = {
   /** A saved video's name. */
   name: 100,
 } as const
+
+/** Photos one day can hold (each about 300 KB once resized). */
+export const MAX_PHOTOS_PER_DAY = 12

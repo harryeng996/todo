@@ -2,13 +2,19 @@ import { Camera, History, ImageOff } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { formatDayShort, type DateKey } from '../../lib/date.ts'
 import { formatDelta } from '../../lib/format.ts'
-import { formatWeight, toUnit, type WeightUnit } from '../../lib/weight.ts'
+import {
+  formatWeight,
+  slidesOf,
+  toUnit,
+  type PhotoKey,
+  type WeightUnit,
+} from '../../lib/weight.ts'
 import { useWeights } from '../../state/useWeights.ts'
 import { SketchButton } from '../sketch/SketchButton.tsx'
+import { PhotoGrid } from './PhotoGrid.tsx'
 import { PhotoPreview } from './PhotoPreview.tsx'
 import { usePhotoPicker } from './usePhotoPicker.tsx'
 import { useWindowedRows } from './useWindowedRows.ts'
-import { PhotoThumb } from './PhotoThumb.tsx'
 import { WeightEditor } from './WeightEditor.tsx'
 
 interface WeightHistoryProps {
@@ -19,7 +25,7 @@ interface WeightHistoryProps {
 interface HistoryRow {
   date: DateKey
   kg: number | null
-  hasPhoto: boolean
+  photos: readonly PhotoKey[]
   /** Change from the weigh-in before it, in kg. */
   change: number | null
 }
@@ -31,29 +37,33 @@ const icon = { size: 16, strokeWidth: 1.75, 'aria-hidden': true } as const
  * Click one to edit its weight or photo, or delete it.
  */
 export function WeightHistory({ today, unit }: WeightHistoryProps) {
-  const { log, photoVersions, setWeight, removePhoto, deleteEntry } =
+  const { log, setWeight, removePhoto, removeAllPhotos, deleteEntry } =
     useWeights()
-  const photos = usePhotoPicker()
   const [openDate, setOpenDate] = useState<DateKey | null>(null)
-  const [previewDate, setPreviewDate] = useState<DateKey | null>(null)
+  const [previewPhoto, setPreviewPhoto] = useState<PhotoKey | null>(null)
+  const photos = usePhotoPicker((old, key) =>
+    setPreviewPhoto((shown) => (shown === old ? key : shown)),
+  )
 
   // One pass, oldest first, carrying the last weigh-in along.
   const rows = useMemo(() => {
     const out: HistoryRow[] = []
     let previousKg: number | null = null
     for (const date of Object.keys(log).sort()) {
-      const { kg, hasPhoto } = log[date]
+      const { kg, photos } = log[date]
       const change = kg !== null && previousKg !== null ? kg - previousKg : null
-      out.push({ date, kg, hasPhoto, change })
+      out.push({ date, kg, photos, change })
       if (kg !== null) previousKg = kg
     }
     return out.reverse()
   }, [log])
 
-  const photoDates = rows
-    .filter((row) => row.hasPhoto)
-    .map((row) => row.date)
-    .reverse()
+  // Every photo, oldest first, for the slideshow; only worked out while open.
+  const previewing = previewPhoto !== null
+  const slides = useMemo(
+    () => (previewing ? slidesOf(log) : []),
+    [log, previewing],
+  )
   const close = () => setOpenDate(null)
   const { scrollerRef, onScroll, measureRow, range } = useWindowedRows(
     rows.length,
@@ -112,17 +122,18 @@ export function WeightHistory({ today, unit }: WeightHistoryProps) {
                           formatDelta(toUnit(row.change, unit))}
                       </span>
                     </button>
-                    {row.hasPhoto && (
+                    {row.photos.length > 0 && (
                       <button
                         type="button"
                         className="history__thumb"
-                        onClick={() => setPreviewDate(row.date)}
-                        aria-label={`Open photo for ${formatDayShort(row.date)}`}
+                        onClick={() => setPreviewPhoto(row.photos[0])}
+                        aria-label={
+                          row.photos.length > 1
+                            ? `Open ${row.photos.length} photos for ${formatDayShort(row.date)}`
+                            : `Open photo for ${formatDayShort(row.date)}`
+                        }
                       >
-                        <PhotoThumb
-                          date={row.date}
-                          version={photoVersions[row.date] ?? 0}
-                        />
+                        <PhotoGrid photos={row.photos} />
                       </button>
                     )}
                   </div>
@@ -145,19 +156,21 @@ export function WeightHistory({ today, unit }: WeightHistoryProps) {
                       <div className="history__photo-actions">
                         <SketchButton
                           variant="ghost"
-                          onClick={() => photos.pick(row.date)}
-                          disabled={photos.busy}
+                          onClick={() => photos.add(row.date)}
+                          disabled={photos.busy || photos.room(row.date) === 0}
                         >
                           <Camera {...icon} />
-                          {row.hasPhoto ? 'Replace photo' : 'Add photo'}
+                          Add photos
                         </SketchButton>
-                        {row.hasPhoto && (
+                        {row.photos.length > 0 && (
                           <SketchButton
                             variant="ghost"
-                            onClick={() => void removePhoto(row.date)}
+                            onClick={() => void removeAllPhotos(row.date)}
                           >
                             <ImageOff {...icon} />
-                            Remove photo
+                            {row.photos.length > 1
+                              ? `Remove ${row.photos.length} photos`
+                              : 'Remove photo'}
                           </SketchButton>
                         )}
                       </div>
@@ -170,7 +183,7 @@ export function WeightHistory({ today, unit }: WeightHistoryProps) {
         </div>
       )}
 
-      {photos.busy && <p className="weight__status">Saving photo…</p>}
+      {photos.status && <p className="weight__status">{photos.status}</p>}
       {photos.error && (
         <p className="weight__error" role="alert">
           {photos.error}
@@ -178,19 +191,15 @@ export function WeightHistory({ today, unit }: WeightHistoryProps) {
       )}
 
       <PhotoPreview
-        date={previewDate}
-        dates={photoDates}
-        version={previewDate ? (photoVersions[previewDate] ?? 0) : 0}
+        photo={previewPhoto}
+        slides={slides}
         log={log}
         unit={unit}
         today={today}
-        onShow={setPreviewDate}
-        onClose={() => setPreviewDate(null)}
-        onReplace={photos.pick}
-        onRemove={(date) => {
-          setPreviewDate(null)
-          void removePhoto(date)
-        }}
+        onShow={setPreviewPhoto}
+        onClose={() => setPreviewPhoto(null)}
+        onReplace={(slide) => photos.replace(slide.date, slide.photo)}
+        onRemove={(slide) => void removePhoto(slide.date, slide.photo)}
       />
       {photos.input}
     </section>

@@ -5,15 +5,17 @@ import { backfillThumbnails } from '../../lib/photos.ts'
 import {
   chartPoints,
   formatWeight,
+  slidesOf,
   toUnit,
+  type PhotoKey,
   type WeightUnit,
 } from '../../lib/weight.ts'
 import { useWeights } from '../../state/useWeights.ts'
 import { ScrollLineChart } from '../charts/ScrollLineChart.tsx'
 import { SketchButton } from '../sketch/SketchButton.tsx'
+import { PhotoGrid } from './PhotoGrid.tsx'
 import { PhotoPreview } from './PhotoPreview.tsx'
 import { usePhotoPicker } from './usePhotoPicker.tsx'
-import { usePhotoUrl } from './usePhotoUrl.ts'
 import { WeightComparisonText } from './WeightComparisonText.tsx'
 import { WeightEditor } from './WeightEditor.tsx'
 import { WeightHistory } from './WeightHistory.tsx'
@@ -26,15 +28,23 @@ interface WeightPanelProps {
 
 const icon = { size: 18, strokeWidth: 1.75, 'aria-hidden': true } as const
 
-/** Plus feature: the selected day's weight and photo, the trend chart and comparisons. */
+const NO_PHOTOS: readonly PhotoKey[] = []
+
+/** Plus feature: the selected day's weight and photos, the trend chart and comparisons. */
 export function WeightPanel({ selectedDate, today, unit }: WeightPanelProps) {
-  const { log, photoVersions, setWeight, removePhoto } = useWeights()
-  const photos = usePhotoPicker()
+  const { log, setWeight, removePhoto } = useWeights()
+  const [previewPhoto, setPreviewPhoto] = useState<PhotoKey | null>(null)
+  const photos = usePhotoPicker((old, key) =>
+    setPreviewPhoto((shown) => (shown === old ? key : shown)),
+  )
   const entry = log[selectedDate]
   const kg = entry?.kg ?? null
-  const hasPhoto = entry?.hasPhoto ?? false
+  const dayPhotos = entry?.photos ?? NO_PHOTOS
   const dayLabel = relativeDayLabel(selectedDate, today)
-  const photoVersion = photoVersions[selectedDate] ?? 0
+  const slides = useMemo(
+    () => slidesOf(log, [selectedDate]),
+    [log, selectedDate],
+  )
 
   // Older photos get thumbnails in idle time, before the history needs them.
   useEffect(() => {
@@ -42,21 +52,14 @@ export function WeightPanel({ selectedDate, today, unit }: WeightPanelProps) {
   }, [])
 
   const [editing, setEditing] = useState(false)
-  const [previewOpen, setPreviewOpen] = useState(false)
 
   // Switching days closes the editor and the preview.
   const [shownDate, setShownDate] = useState(selectedDate)
   if (shownDate !== selectedDate) {
     setShownDate(selectedDate)
     setEditing(false)
-    setPreviewOpen(false)
+    setPreviewPhoto(null)
   }
-
-  const thumbUrl = usePhotoUrl(
-    hasPhoto ? selectedDate : null,
-    photoVersion,
-    'thumb',
-  )
 
   // Every weigh-in (up to a year), at least a two-week axis.
   const series = useMemo(() => {
@@ -76,14 +79,14 @@ export function WeightPanel({ selectedDate, today, unit }: WeightPanelProps) {
           Weight · {dayLabel}
         </h2>
         <span className="weight__plus">plus</span>
-        {!hasPhoto && (
+        {photos.room(selectedDate) > 0 && (
           <SketchButton
             variant="ghost"
             className="weight__add-photo"
-            onClick={() => photos.pick(selectedDate)}
+            onClick={() => photos.add(selectedDate)}
             disabled={photos.busy}
-            aria-label={`Add photo for ${dayLabel}`}
-            title="Add photo"
+            aria-label={`Add photos for ${dayLabel}`}
+            title="Add photos"
           >
             <Camera size={20} strokeWidth={1.75} aria-hidden="true" />
           </SketchButton>
@@ -123,20 +126,24 @@ export function WeightPanel({ selectedDate, today, unit }: WeightPanelProps) {
           >
             <Pencil {...icon} />
           </SketchButton>
-          {thumbUrl && (
+          {dayPhotos.length > 0 && (
             <button
               type="button"
               className="weight__thumb"
-              onClick={() => setPreviewOpen(true)}
-              aria-label={`Open photo for ${dayLabel}`}
+              onClick={() => setPreviewPhoto(dayPhotos[0])}
+              aria-label={
+                dayPhotos.length > 1
+                  ? `Open ${dayPhotos.length} photos for ${dayLabel}`
+                  : `Open photo for ${dayLabel}`
+              }
             >
-              <img src={thumbUrl} alt="" decoding="async" />
+              <PhotoGrid photos={dayPhotos} />
             </button>
           )}
         </div>
       )}
 
-      {photos.busy && <p className="weight__status">Saving photo…</p>}
+      {photos.status && <p className="weight__status">{photos.status}</p>}
       {photos.error && (
         <p className="weight__error" role="alert">
           {photos.error}
@@ -159,19 +166,15 @@ export function WeightPanel({ selectedDate, today, unit }: WeightPanelProps) {
       <WeightHistory today={today} unit={unit} />
 
       <PhotoPreview
-        date={previewOpen ? selectedDate : null}
-        dates={[selectedDate]}
-        version={photoVersion}
+        photo={previewPhoto}
+        slides={slides}
         log={log}
         unit={unit}
         today={today}
-        onShow={() => {}}
-        onClose={() => setPreviewOpen(false)}
-        onReplace={photos.pick}
-        onRemove={(date) => {
-          setPreviewOpen(false)
-          void removePhoto(date)
-        }}
+        onShow={setPreviewPhoto}
+        onClose={() => setPreviewPhoto(null)}
+        onReplace={(slide) => photos.replace(slide.date, slide.photo)}
+        onRemove={(slide) => void removePhoto(slide.date, slide.photo)}
       />
       {photos.input}
     </section>

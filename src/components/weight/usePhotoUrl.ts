@@ -1,31 +1,31 @@
 import { useEffect, useState } from 'react'
-import type { DateKey } from '../../lib/date.ts'
 import { loadPhoto, loadThumbnail } from '../../lib/photos.ts'
+import type { PhotoKey } from '../../lib/weight.ts'
 
 export type PhotoSize = 'thumb' | 'full'
 
 /**
- * An object URL for one day's photo or thumbnail (null `date` loads nothing).
- * Revoked when the day, size or `version` changes, or on unmount.
+ * An object URL for a photo or its thumbnail (null `photo` loads nothing).
+ * Revoked when the photo or size changes, or on unmount. Photo keys are never
+ * reused, so a URL never goes stale while its key is shown.
  */
 export function usePhotoUrl(
-  date: DateKey | null,
-  version: number,
+  photo: PhotoKey | null,
   size: PhotoSize,
 ): string | undefined {
-  const key = date ? `${date}|${size}|${version}` : ''
+  const key = photo ? `${size}|${photo}` : ''
   // Tagged with what it was loaded for, so a stale URL is never returned.
   const [loaded, setLoaded] = useState<{ key: string; url: string } | null>(
     null,
   )
 
   useEffect(() => {
-    if (!date) return
+    if (!photo) return
     let url: string | undefined
     // Aborted on cleanup: a thumbnail scrolled away stops jumping the queue.
     const gone = new AbortController()
     const load =
-      size === 'thumb' ? loadThumbnail(date, gone.signal) : loadPhoto(date)
+      size === 'thumb' ? loadThumbnail(photo, gone.signal) : loadPhoto(photo)
     void load
       .catch(() => undefined)
       .then((blob) => {
@@ -37,7 +37,7 @@ export function usePhotoUrl(
       gone.abort()
       if (url) URL.revokeObjectURL(url)
     }
-  }, [date, size, key])
+  }, [photo, size, key])
 
   return loaded?.key === key ? loaded.url : undefined
 }
