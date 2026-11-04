@@ -80,6 +80,18 @@ describe('urls', () => {
     )
   })
 
+  it('asks for autoplay and the player API only when told to', () => {
+    const url = new URL(
+      embedUrl(
+        { videoId: ID },
+        { autoplay: true, apiOrigin: 'http://localhost:5173' },
+      ),
+    )
+    expect(url.searchParams.get('autoplay')).toBe('1')
+    expect(url.searchParams.get('enablejsapi')).toBe('1')
+    expect(url.searchParams.get('origin')).toBe('http://localhost:5173')
+  })
+
   it('links back to YouTube', () => {
     expect(watchUrl({ videoId: ID, start: 30 })).toBe(
       `https://www.youtube.com/watch?v=${ID}&t=30s`,

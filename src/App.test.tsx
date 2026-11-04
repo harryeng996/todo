@@ -681,9 +681,13 @@ describe('youtube', () => {
       'Focus music',
     )
     await user.click(within(dialog).getByRole('button', { name: 'Add video' }))
-    expect(frame()!.src).toBe(
-      'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?rel=0&start=30',
+    const src = new URL(frame()!.src)
+    expect(src.origin + src.pathname).toBe(
+      'https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ',
     )
+    expect(src.searchParams.get('start')).toBe('30')
+    // Nothing plays until a video is picked in the player itself.
+    expect(src.searchParams.has('autoplay')).toBe(false)
     expect(frame()!.title).toBe('Focus music')
 
     await user.type(link, 'https://www.youtube.com/watch?v=jfKfPfyJRdk')
@@ -699,6 +703,7 @@ describe('youtube', () => {
       'Focus music',
     )
     expect(frame()!.src).toContain('/embed/dQw4w9WgXcQ')
+    expect(new URL(frame()!.src).searchParams.get('autoplay')).toBe('1')
 
     unmount()
     render(<App />)

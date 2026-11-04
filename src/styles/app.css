@@ -1706,13 +1706,27 @@
   white-space: nowrap;
 }
 
+/* ⏮ ⏯ ⏭ centred under the video, the YouTube link at the right. */
+.youtube__controls {
+  display: grid;
+  grid-template-columns: 1fr repeat(3, auto) 1fr;
+  align-items: center;
+  gap: var(--space);
+  margin-top: var(--space);
+}
+
+.youtube__controls > :first-child {
+  grid-column: 2;
+}
+
 .youtube__open {
   display: inline-flex;
   align-items: center;
+  justify-self: end;
   gap: 4px;
-  margin-top: 4px;
   color: var(--pencil);
   font-size: 0.95rem;
+  text-align: right;
 }
 
 .youtube__list {

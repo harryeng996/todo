@@ -84,12 +84,33 @@ export function parseYouTube(input: string): YouTubeRef | null {
   return ref
 }
 
+/** Where embeds load from (YouTube's privacy-enhanced mode). */
+export const EMBED_ORIGIN = 'https://www.youtube-nocookie.com'
+
+export interface EmbedOptions {
+  /** Start playing once loaded (browsers may still require a click first). */
+  autoplay?: boolean
+  /**
+   * This page's origin: turns on the player's postMessage API (play, pause,
+   * state changes), which then talks only to this origin.
+   */
+  apiOrigin?: string
+}
+
 /** Privacy-enhanced embed URL built only from parsed ids. */
-export function embedUrl(ref: YouTubeRef): string {
+export function embedUrl(
+  ref: YouTubeRef,
+  { autoplay = false, apiOrigin }: EmbedOptions = {},
+): string {
   const params = new URLSearchParams({ rel: '0' })
   if (ref.start) params.set('start', String(ref.start))
   if (ref.playlistId) params.set('list', ref.playlistId)
-  return `https://www.youtube-nocookie.com/embed/${ref.videoId ?? 'videoseries'}?${params}`
+  if (autoplay) params.set('autoplay', '1')
+  if (apiOrigin) {
+    params.set('enablejsapi', '1')
+    params.set('origin', apiOrigin)
+  }
+  return `${EMBED_ORIGIN}/embed/${ref.videoId ?? 'videoseries'}?${params}`
 }
 
 export function watchUrl(ref: YouTubeRef): string {
