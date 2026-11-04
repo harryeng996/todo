@@ -4,6 +4,7 @@ import { formatDayShort, type DateKey } from '../../lib/date.ts'
 import {
   filterSessions,
   formatMinutes,
+  MAX_CHART_DAYS,
   NO_TASK,
   RANGE_LABELS,
   rangeStart,
@@ -132,13 +133,19 @@ export function PomodoroStats({ open, onClose, today }: PomodoroStatsProps) {
             {filter.range !== 'today' && (
               <ScrollLineChart
                 points={summary.perDay}
-                start={from}
+                start={summary.perDay[0].date}
                 end={today}
                 label="Focus minutes per day"
                 format={(value) => `${Math.round(value)} min`}
                 fromZero
                 seed={151}
               />
+            )}
+            {summary.truncated && (
+              <p className="settings__hint">
+                The chart shows the last {MAX_CHART_DAYS} days; the totals cover
+                all time.
+              </p>
             )}
 
             {newestFirst.length === 0 ? (

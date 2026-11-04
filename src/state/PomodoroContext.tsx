@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { playChime } from '../lib/chime.ts'
+import { createRecordStore } from '../lib/recordStore.ts'
 import { createJsonStore } from '../lib/storage.ts'
 import {
   applyConfig,
@@ -30,31 +31,67 @@ const timerStore = createJsonStore<TimerState | null>(
   'todoapp.pomodoro.timer.v1',
   () => null,
 )
-const sessionStore = createJsonStore<FocusSession[]>(
-  'todoapp.pomodoro.sessions.v1',
-  () => [],
-)
+const SESSIONS_V1 = 'todoapp.pomodoro.sessions.v1'
 
-function load(): PomodoroState {
+/** Finished sessions grow every day: IndexedDB, one record each, oldest first. */
+const sessionRecords = createRecordStore<FocusSession>({
+  dbName: 'todoapp-focus-sessions',
+  legacy: createJsonStore<FocusSession[]>(SESSIONS_V1, () => []),
+  legacyKeys: [SESSIONS_V1],
+  compare: (a, b) => a.end - b.end,
+})
+
+function load(sessions: FocusSession[]): PomodoroState {
   const config = { ...DEFAULT_CONFIG, ...configStore.load() }
   return {
     config,
     // A running timer survives a reload: it counts from its stored end time.
     timer: timerStore.load() ?? idleTimer('focus', config),
-    sessions: sessionStore.load(),
+    sessions,
   }
 }
 
 /** Pomodoro timer, its settings and the finished focus sessions. */
 export function PomodoroProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState(load)
+  const [sessions, setSessions] = useState(
+    () => sessionRecords.loadNow() ?? null,
+  )
+
+  useEffect(() => {
+    if (sessions) return
+    let cancelled = false
+    void sessionRecords.load().then((loaded) => {
+      if (!cancelled) setSessions(loaded)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [sessions])
+
+  // Wait for the sessions, so a phase that ended while the page was closed is
+  // added to the full list rather than to an empty one.
+  if (!sessions) return null
+  return <LoadedPomodoro sessions={sessions}>{children}</LoadedPomodoro>
+}
+
+function LoadedPomodoro({
+  sessions,
+  children,
+}: {
+  sessions: FocusSession[]
+  children: ReactNode
+}) {
+  const [state, setState] = useState(() => load(sessions))
   const soundOn = useRef(state.config.sound)
+  const savedSessions = useRef(sessions)
 
   useEffect(() => {
     soundOn.current = state.config.sound
     configStore.save(state.config)
     timerStore.save(state.timer)
-    sessionStore.save(state.sessions)
+    // Only new or deleted sessions are written.
+    void sessionRecords.sync(savedSessions.current, state.sessions)
+    savedSessions.current = state.sessions
   }, [state])
 
   // Finish the phase exactly when it runs out (straight away if that happened

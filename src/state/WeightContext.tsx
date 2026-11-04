@@ -1,6 +1,11 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import type { DateKey } from '../lib/date.ts'
-import { deletePhoto, resizePhoto, savePhoto } from '../lib/photos.ts'
+import {
+  deletePhoto,
+  resizePhoto,
+  savePhoto,
+  THUMB_SIDE,
+} from '../lib/photos.ts'
 import { createJsonStore } from '../lib/storage.ts'
 import type { WeightEntry, WeightLog } from '../lib/weight.ts'
 import { WeightContext } from './useWeights.ts'
@@ -13,7 +18,9 @@ const weightStore = createJsonStore<WeightLog>('todoapp.weight.v1', () => ({}))
  */
 export function WeightProvider({ children }: { children: ReactNode }) {
   const [log, setLog] = useState(() => weightStore.load())
-  const [photoVersion, setPhotoVersion] = useState(0)
+  const [photoVersions, setPhotoVersions] = useState<Record<DateKey, number>>(
+    {},
+  )
 
   useEffect(() => {
     weightStore.save(log)
@@ -41,12 +48,13 @@ export function WeightProvider({ children }: { children: ReactNode }) {
 
   const value = {
     log,
-    photoVersion,
+    photoVersions,
     setWeight: (date: DateKey, kg: number | null) => update(date, { kg }),
     async setPhoto(date: DateKey, file: File) {
-      await savePhoto(date, await resizePhoto(file))
+      const photo = await resizePhoto(file)
+      await savePhoto(date, photo, await resizePhoto(photo, THUMB_SIDE, 0.8))
       update(date, { hasPhoto: true })
-      setPhotoVersion((v) => v + 1)
+      setPhotoVersions((v) => ({ ...v, [date]: (v[date] ?? 0) + 1 }))
     },
     removePhoto,
     async deleteEntry(date: DateKey) {

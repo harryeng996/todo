@@ -1,6 +1,7 @@
 import { Camera, Pencil } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { addDays, relativeDayLabel, type DateKey } from '../../lib/date.ts'
+import { backfillThumbnails } from '../../lib/photos.ts'
 import {
   chartPoints,
   formatWeight,
@@ -12,7 +13,7 @@ import { ScrollLineChart } from '../charts/ScrollLineChart.tsx'
 import { SketchButton } from '../sketch/SketchButton.tsx'
 import { PhotoPreview } from './PhotoPreview.tsx'
 import { usePhotoPicker } from './usePhotoPicker.tsx'
-import { usePhotoUrls } from './usePhotoUrls.ts'
+import { usePhotoUrl } from './usePhotoUrl.ts'
 import { WeightComparisonText } from './WeightComparisonText.tsx'
 import { WeightEditor } from './WeightEditor.tsx'
 import { WeightHistory } from './WeightHistory.tsx'
@@ -27,12 +28,18 @@ const icon = { size: 18, strokeWidth: 1.75, 'aria-hidden': true } as const
 
 /** Plus feature: the selected day's weight and photo, the trend chart and comparisons. */
 export function WeightPanel({ selectedDate, today, unit }: WeightPanelProps) {
-  const { log, photoVersion, setWeight, removePhoto } = useWeights()
+  const { log, photoVersions, setWeight, removePhoto } = useWeights()
   const photos = usePhotoPicker()
   const entry = log[selectedDate]
   const kg = entry?.kg ?? null
   const hasPhoto = entry?.hasPhoto ?? false
   const dayLabel = relativeDayLabel(selectedDate, today)
+  const photoVersion = photoVersions[selectedDate] ?? 0
+
+  // Older photos get thumbnails in idle time, before the history needs them.
+  useEffect(() => {
+    void backfillThumbnails()
+  }, [])
 
   const [editing, setEditing] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
@@ -45,7 +52,11 @@ export function WeightPanel({ selectedDate, today, unit }: WeightPanelProps) {
     setPreviewOpen(false)
   }
 
-  const photoUrls = usePhotoUrls(hasPhoto ? [selectedDate] : [], photoVersion)
+  const thumbUrl = usePhotoUrl(
+    hasPhoto ? selectedDate : null,
+    photoVersion,
+    'thumb',
+  )
 
   // Every weigh-in (up to a year), at least a two-week axis.
   const series = useMemo(() => {
@@ -112,14 +123,14 @@ export function WeightPanel({ selectedDate, today, unit }: WeightPanelProps) {
           >
             <Pencil {...icon} />
           </SketchButton>
-          {photoUrls[selectedDate] && (
+          {thumbUrl && (
             <button
               type="button"
               className="weight__thumb"
               onClick={() => setPreviewOpen(true)}
               aria-label={`Open photo for ${dayLabel}`}
             >
-              <img src={photoUrls[selectedDate]} alt="" />
+              <img src={thumbUrl} alt="" decoding="async" />
             </button>
           )}
         </div>
@@ -150,7 +161,7 @@ export function WeightPanel({ selectedDate, today, unit }: WeightPanelProps) {
       <PhotoPreview
         date={previewOpen ? selectedDate : null}
         dates={[selectedDate]}
-        urls={photoUrls}
+        version={photoVersion}
         log={log}
         unit={unit}
         today={today}

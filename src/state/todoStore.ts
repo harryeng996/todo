@@ -1,4 +1,5 @@
 import { toDateKey } from '../lib/date.ts'
+import { createRecordStore } from '../lib/recordStore.ts'
 import { createJsonStore } from '../lib/storage.ts'
 import type { Todo } from '../types/todo.ts'
 import { sampleTodos } from './todoReducer.ts'
@@ -20,7 +21,17 @@ function initialTodos(): Todo[] {
   return v1 ? migrateV1(v1) : sampleTodos(toDateKey(new Date()))
 }
 
+/** The localStorage list (v2): migrated from, and used without IndexedDB. */
 export const todoStore = createJsonStore<Todo[]>(
   'todoapp.todos.v2',
   initialTodos,
 )
+
+/** Todos in IndexedDB, one record each, in the order they were added. */
+export const todoRecords = createRecordStore<Todo>({
+  dbName: 'todoapp-todos',
+  legacy: todoStore,
+  legacyKeys: ['todoapp.todos.v2', V1_KEY],
+  compare: (a, b) =>
+    a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0,
+})

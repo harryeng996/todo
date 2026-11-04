@@ -1,5 +1,6 @@
 import { Plus, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
+import { MAX_LENGTH } from '../../lib/limits.ts'
 import { useVideos } from '../../state/useVideos.ts'
 import { SketchButton } from '../sketch/SketchButton.tsx'
 import { SketchInput } from '../sketch/SketchInput.tsx'
@@ -35,6 +36,7 @@ export function VideoSettings() {
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Name (optional)"
+            maxLength={MAX_LENGTH.name}
             aria-label="Video name (optional)"
           />
           <SketchButton type="submit" variant="primary" aria-label="Add video">

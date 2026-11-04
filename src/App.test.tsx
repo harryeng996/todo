@@ -41,6 +41,35 @@ describe('todo list', () => {
     )
     expect(screen.queryByText('Water plants')).not.toBeInTheDocument()
   })
+
+  it('limits how long a todo can be', () => {
+    render(<App />)
+    expect(screen.getByLabelText('New to-do')).toHaveAttribute(
+      'maxLength',
+      '200',
+    )
+  })
+})
+
+describe('storage full', () => {
+  it('warns once instead of losing changes silently', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    expect(screen.queryByText(/Storage is full/)).not.toBeInTheDocument()
+
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('quota', 'QuotaExceededError')
+    })
+    await user.type(screen.getByLabelText('New to-do'), 'One more{Enter}')
+    expect(screen.getByText(/Storage is full/)).toBeInTheDocument()
+
+    await user.click(
+      screen.getByRole('button', { name: 'Dismiss storage warning' }),
+    )
+    await user.type(screen.getByLabelText('New to-do'), 'And another{Enter}')
+    expect(screen.queryByText(/Storage is full/)).not.toBeInTheDocument()
+    vi.restoreAllMocks()
+  })
 })
 
 describe('countdown', () => {
@@ -593,6 +622,34 @@ describe('weight tracking', () => {
     )
     expect(rows()).toHaveLength(2)
     expect(rows()[1]).toMatch(/71\.0 kg \| $/)
+  })
+
+  it('renders only the history rows near view of a long list', async () => {
+    const log: Record<string, { kg: number; hasPhoto: boolean }> = {}
+    for (let i = 1; i <= 500; i++)
+      log[addDays(today(), -i)] = { kg: 70 + (i % 5), hasPhoto: false }
+    localStorage.setItem('todoapp.weight.v1', JSON.stringify(log))
+    const user = userEvent.setup()
+    render(<App />)
+    await enableWeight(user)
+
+    const scroller = history().querySelector('.history__list')!
+    const list = history().querySelector('ol')!
+    const items = () => [...list.querySelectorAll('li')]
+    expect(items().length).toBeLessThan(30)
+    expect(items()[0]).toHaveAttribute('aria-posinset', '1')
+    expect(items()[0]).toHaveAttribute('aria-setsize', '500')
+    // Space stands in for the rows not rendered.
+    expect(parseFloat(list.style.paddingBottom)).toBeGreaterThan(10_000)
+
+    // Scrolled halfway: rows around there are rendered, the first ones aren't.
+    Object.defineProperty(scroller, 'scrollTop', { value: 250 * 48 })
+    fireEvent.scroll(scroller)
+    const shown = items().map((li) => Number(li.getAttribute('aria-posinset')))
+    expect(shown).toContain(251)
+    expect(shown).not.toContain(1)
+    expect(items().length).toBeLessThan(30)
+    expect(parseFloat(list.style.paddingTop)).toBeGreaterThan(10_000)
   })
 })
 

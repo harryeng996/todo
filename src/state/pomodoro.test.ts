@@ -161,6 +161,18 @@ describe('statistics', () => {
     expect(summary.perDay).toHaveLength(7)
     expect(summary.perDay.at(-1)).toEqual({ date: today, value: 50 })
     expect(summary.perDay.at(-3)).toEqual({ date: '2026-11-02', value: 50 })
+    expect(summary.truncated).toBe(false)
+  })
+
+  it('caps the chart for a very long range but keeps all-time totals', () => {
+    // A session saved while the device clock said 1970.
+    const withBadClock = [...sessions, session('1970-01-01', 25, 'Thesis')]
+    const all = filterSessions(withBadClock, { range: 'all', task: '' }, today)
+    const summary = summarize(all, '1970-01-01', today, 30)
+    expect(summary).toMatchObject({ count: 6, minutes: 175, truncated: true })
+    expect(summary.perDay).toHaveLength(30)
+    expect(summary.perDay[0].date).toBe('2026-10-06')
+    expect(summary.perDay.at(-1)).toEqual({ date: today, value: 50 })
   })
 
   it('lists task titles by use', () => {

@@ -31,9 +31,11 @@ export function createTodo(title: string, date: DateKey): Todo {
 }
 
 export function sampleTodos(date: DateKey): Todo[] {
+  // A millisecond apart, so loading them in creation order keeps this order.
+  const now = Date.now()
   return [
     { ...createTodo('Sketch out the to-do app', date), done: true },
     createTodo('Try ticking this box', date),
     createTodo('Add something of your own above', date),
-  ]
+  ].map((todo, i) => ({ ...todo, createdAt: new Date(now + i).toISOString() }))
 }

@@ -264,20 +264,32 @@ export function filterSessions(
   )
 }
 
+/**
+ * Most days drawn in the chart (a year, like the todo chart). "All time" can
+ * span far more, e.g. a session saved while the device clock was wrong.
+ */
+export const MAX_CHART_DAYS = 365
+
 export interface StatsSummary {
   count: number
   minutes: number
   /** Average focus minutes per day over the whole range. */
   perDayAverage: number
+  /** One point per day: the whole range, or its last `maxDays` days. */
   perDay: { date: DateKey; value: number }[]
+  /** perDay doesn't reach back to the start of the range. */
+  truncated: boolean
 }
 
 export function summarize(
   sessions: FocusSession[],
   from: DateKey,
   to: DateKey,
+  maxDays = MAX_CHART_DAYS,
 ): StatsSummary {
   const days = daysBetween(from, to) + 1
+  const chartDays = Math.min(days, maxDays)
+  const chartFrom = addDays(to, -(chartDays - 1))
   const byDay = new Map<DateKey, number>()
   for (const s of sessions)
     byDay.set(s.date, (byDay.get(s.date) ?? 0) + s.minutes)
@@ -286,10 +298,11 @@ export function summarize(
     count: sessions.length,
     minutes,
     perDayAverage: minutes / days,
-    perDay: Array.from({ length: days }, (_, i) => {
-      const date = addDays(from, i)
+    perDay: Array.from({ length: chartDays }, (_, i) => {
+      const date = addDays(chartFrom, i)
       return { date, value: byDay.get(date) ?? 0 }
     }),
+    truncated: chartDays < days,
   }
 }
 

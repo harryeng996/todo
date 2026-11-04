@@ -8,12 +8,14 @@ import {
 } from '../../lib/weight.ts'
 import { SketchBox } from '../sketch/SketchBox.tsx'
 import { SketchButton } from '../sketch/SketchButton.tsx'
+import { usePhotoUrl } from './usePhotoUrl.ts'
 
 interface PhotoPreviewProps {
   /** The photo being shown, or null when closed. */
   date: DateKey | null
   dates: DateKey[] // all photos that can be stepped through, oldest first
-  urls: Record<DateKey, string>
+  /** Bumped when a photo is replaced, so the shown one reloads. */
+  version: number
   log: WeightLog
   unit: WeightUnit
   today: DateKey
@@ -29,7 +31,7 @@ const icon = { size: 20, strokeWidth: 1.75, 'aria-hidden': true } as const
 export function PhotoPreview({
   date,
   dates,
-  urls,
+  version,
   log,
   unit,
   today,
@@ -40,6 +42,7 @@ export function PhotoPreview({
 }: PhotoPreviewProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const open = date !== null
+  const url = usePhotoUrl(date, version, 'full')
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -93,10 +96,10 @@ export function PhotoPreview({
               <X {...icon} />
             </SketchButton>
           </header>
-          {urls[date] && (
+          {url && (
             <img
               className="photo-preview__image"
-              src={urls[date]}
+              src={url}
               alt={`Photo for ${label}`}
             />
           )}

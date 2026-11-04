@@ -4,8 +4,11 @@ import type { WeightLog } from '../lib/weight.ts'
 
 export interface WeightContextValue {
   log: WeightLog
-  /** Bumped when a photo is replaced, so object URLs get reloaded. */
-  photoVersion: number
+  /**
+   * Per day, bumped when that day's photo is replaced, so only its object
+   * URLs reload (0 when never replaced).
+   */
+  photoVersions: Readonly<Record<DateKey, number>>
   setWeight: (date: DateKey, kg: number | null) => void
   setPhoto: (date: DateKey, file: File) => Promise<void>
   removePhoto: (date: DateKey) => Promise<void>

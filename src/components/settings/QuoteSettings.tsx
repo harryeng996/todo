@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
+import { MAX_LENGTH } from '../../lib/limits.ts'
 import { INTERVAL_OPTIONS, type QuoteOrder } from '../../state/quoteLibrary.ts'
 import { useQuoteLibrary } from '../../state/useQuoteLibrary.ts'
 import { SketchButton } from '../sketch/SketchButton.tsx'
@@ -166,6 +167,7 @@ export function QuoteSettings() {
           value={text}
           onChange={(event) => setText(event.target.value)}
           placeholder="Your quote"
+          maxLength={MAX_LENGTH.quote}
           aria-label="New quote"
         />
         <div className="quote-form__row">
@@ -173,6 +175,7 @@ export function QuoteSettings() {
             value={author}
             onChange={(event) => setAuthor(event.target.value)}
             placeholder="Author (optional)"
+            maxLength={MAX_LENGTH.author}
             aria-label="Quote author"
           />
           <SketchButton type="submit" variant="primary">

@@ -13,6 +13,7 @@ import {
 } from './components/settings/SettingsDialog.tsx'
 import { SketchBox } from './components/sketch/SketchBox.tsx'
 import { SketchButton } from './components/sketch/SketchButton.tsx'
+import { StorageNotice } from './components/StorageNotice.tsx'
 import { TodoPanel } from './components/todo/TodoPanel.tsx'
 import { WeightPanel } from './components/weight/WeightPanel.tsx'
 import { YouTubePanel } from './components/youtube/YouTubePanel.tsx'
@@ -118,6 +119,7 @@ function Page() {
         onChange={updateSettings}
         showMusic={MUSIC_PLAYER_ENABLED}
       />
+      <StorageNotice />
     </main>
   )
 }

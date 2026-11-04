@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import type { DateKey } from '../../lib/date.ts'
+import { MAX_LENGTH } from '../../lib/limits.ts'
 import { useTodos } from '../../state/useTodos.ts'
 import { createTodo } from '../../state/todoReducer.ts'
 import { SketchButton } from '../sketch/SketchButton.tsx'
@@ -24,6 +25,7 @@ export function TodoInput({ date }: { date: DateKey }) {
         value={title}
         onChange={(event) => setTitle(event.target.value)}
         placeholder="What needs doing?"
+        maxLength={MAX_LENGTH.title}
         aria-label="New to-do"
       />
       <SketchButton type="submit" variant="primary">

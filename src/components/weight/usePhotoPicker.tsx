@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import type { DateKey } from '../../lib/date.ts'
+import { isQuotaError } from '../../lib/storage.ts'
 import { useWeights } from '../../state/useWeights.ts'
 
 /** Opens the file picker for a given day's photo; render `input` once in the component. */
@@ -16,8 +17,12 @@ export function usePhotoPicker() {
     setError('')
     try {
       await setPhoto(target.current, file)
-    } catch {
-      setError("That photo couldn't be read. Try a JPEG or PNG.")
+    } catch (error) {
+      setError(
+        isQuotaError(error)
+          ? 'Storage is full, so the photo was not saved. Remove some older photos and try again.'
+          : "That photo couldn't be read. Try a JPEG or PNG.",
+      )
     } finally {
       setBusy(false)
     }

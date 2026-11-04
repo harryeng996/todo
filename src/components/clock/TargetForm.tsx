@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import type { DateKey } from '../../lib/date.ts'
+import { MAX_LENGTH } from '../../lib/limits.ts'
 import type { TargetFields } from '../../types/target.ts'
 import { SketchButton } from '../sketch/SketchButton.tsx'
 import { SketchInput } from '../sketch/SketchInput.tsx'
@@ -42,6 +43,7 @@ export function TargetForm({
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           placeholder="e.g. Finish thesis"
+          maxLength={MAX_LENGTH.title}
         />
       </label>
       <label className="target-form__field">
