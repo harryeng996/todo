@@ -252,6 +252,9 @@
 .delta--flat {
   color: var(--text-3);
 }
+.delta > .num {
+  white-space: nowrap;
+}
 .delta__suffix {
   margin-left: 5px;
   font-weight: 450;
@@ -585,8 +588,12 @@
   stroke-dasharray: 4 4;
 }
 .chart__reference text {
-  fill: var(--text-3);
+  fill: var(--text-2);
   font-size: 11px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--surface);
+  stroke-width: 4px;
 }
 .chart__tooltip {
   position: absolute;
@@ -772,20 +779,15 @@
   justify-self: start;
 }
 .task__text {
-  transition: color 0.25s;
+  background: linear-gradient(var(--text-3), var(--text-3)) 0 58% / 0 1.5px
+    no-repeat;
+  transition:
+    color 0.25s,
+    background-size 0.35s var(--ease-out);
 }
 .task.is-done .task__text {
   color: var(--text-3);
-}
-.task__strike {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 52%;
-  height: 1.5px;
-  background: var(--text-3);
-  transform-origin: left;
-  border-radius: 2px;
+  background-size: 100% 1.5px;
 }
 .task__badge {
   flex: none;

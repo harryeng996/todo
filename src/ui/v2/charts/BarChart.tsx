@@ -137,9 +137,9 @@ export function BarChart({
               y2={y(reference.value)}
             />
             <text
-              x={width - PAD.right}
+              x={PAD.left + 4}
               y={y(reference.value) - 5}
-              textAnchor="end"
+              textAnchor="start"
             >
               {reference.label}
             </text>

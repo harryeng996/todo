@@ -82,3 +82,47 @@ describe('v2 navigation', () => {
     )
   })
 })
+
+describe('v2 tasks screen', () => {
+  async function openTasks(section = '') {
+    location.hash = `#/tasks${section}`
+    render(<App />)
+    await screen.findByRole('heading', { level: 1 })
+  }
+
+  it('keeps past days read-only', async () => {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+    const key = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`
+    await openTasks(`/${key}`)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(
+      'Yesterday',
+    )
+    expect(screen.queryByLabelText('New to-do')).not.toBeInTheDocument()
+    expect(screen.getByText('Read-only')).toBeInTheDocument()
+  })
+
+  it('plans a task for tomorrow', async () => {
+    const user = userEvent.setup()
+    await openTasks()
+    await user.click(screen.getByRole('button', { name: 'Next day' }))
+    expect(await screen.findByText('Upcoming')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('New to-do'), 'Dentist{Enter}')
+    expect(
+      await screen.findByRole('checkbox', { name: 'Dentist' }),
+    ).toBeInTheDocument()
+    // Exactly one input, even after switching days.
+    await user.click(screen.getByRole('button', { name: 'Previous day' }))
+    expect(screen.getAllByLabelText('New to-do')).toHaveLength(1)
+  })
+
+  it('shows statistics', async () => {
+    await openTasks()
+    expect(screen.getByText('Done rate · 7d')).toBeInTheDocument()
+    expect(screen.getByText('Done per day')).toBeInTheDocument()
+    expect(screen.getByText('By weekday')).toBeInTheDocument()
+    expect(
+      screen.getByRole('group', { name: 'Activity by day' }),
+    ).toBeInTheDocument()
+  })
+})

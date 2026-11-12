@@ -34,6 +34,11 @@ export function navigate(screen: Screen, section?: string): void {
   location.hash = routeHref(screen, section)
 }
 
+/** Like navigate, without adding a history entry (e.g. stepping through days). */
+export function replaceRoute(screen: Screen, section?: string): void {
+  location.replace(routeHref(screen, section))
+}
+
 function subscribe(callback: () => void) {
   window.addEventListener('hashchange', callback)
   return () => window.removeEventListener('hashchange', callback)

@@ -76,6 +76,7 @@ export function TaskRow({ todo, editable = true, onCompleted }: TaskRowProps) {
         aria-checked={todo.done}
         aria-label={todo.title}
         onClick={toggle}
+        disabled={!editable}
       >
         <svg viewBox="0 0 20 20" aria-hidden="true">
           <motion.circle
@@ -117,14 +118,8 @@ export function TaskRow({ todo, editable = true, onCompleted }: TaskRowProps) {
           className="task__title"
           onDoubleClick={editable ? () => setEditing(true) : undefined}
         >
+          {/* The strike-through is a background that sweeps across each line (CSS). */}
           <span className="task__text">{todo.title}</span>
-          <motion.span
-            className="task__strike"
-            initial={false}
-            animate={{ scaleX: todo.done ? 1 : 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            aria-hidden="true"
-          />
         </span>
       )}
 
@@ -146,15 +141,17 @@ export function TaskRow({ todo, editable = true, onCompleted }: TaskRowProps) {
               <Pencil size={15} aria-hidden="true" />
             </IconButton>
           )}
-          <IconButton
-            label="Delete task"
-            size="sm"
-            variant="ghost"
-            className="task__delete"
-            onClick={remove}
-          >
-            <Trash2 size={16} aria-hidden="true" />
-          </IconButton>
+          {editable && (
+            <IconButton
+              label="Delete task"
+              size="sm"
+              variant="ghost"
+              className="task__delete"
+              onClick={remove}
+            >
+              <Trash2 size={16} aria-hidden="true" />
+            </IconButton>
+          )}
         </span>
       )}
     </motion.li>

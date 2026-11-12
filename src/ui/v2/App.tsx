@@ -11,12 +11,13 @@ import { ToastProvider } from './components/Toast.tsx'
 import { ComingSoon } from './screens/ComingSoon.tsx'
 import { HomeScreen } from './screens/home/HomeScreen.tsx'
 import { SettingsScreen } from './screens/settings/SettingsScreen.tsx'
+import { TasksScreen } from './screens/tasks/TasksScreen.tsx'
 import { Shell } from './shell/Shell.tsx'
 import { AppSettingsProvider, TargetsProvider } from './state/AppProviders.tsx'
 
 const screens = {
   home: () => <HomeScreen />,
-  tasks: () => <ComingSoon title="Tasks" />,
+  tasks: () => <TasksScreen />,
   focus: () => <ComingSoon title="Focus" />,
   body: () => <ComingSoon title="Body" />,
   settings: () => <SettingsScreen />,
