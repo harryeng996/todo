@@ -1,0 +1,758 @@
+/* ================= Scene ================= */
+.saver {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  overflow: hidden;
+  outline: none;
+  cursor: none;
+  color: #1b1a18;
+  font-family: var(--font);
+  --wall-a: #efe9e1;
+  --wall-b: #e0d8cc;
+  --wall-c: #cfc5b7;
+  --board: #f4f0ea;
+  --plank: #c49a6c;
+  --plank-dark: #a97f53;
+  --light: rgb(255 250 236 / 0.92);
+  --light-fade: rgb(255 246 222 / 0.3);
+}
+.saver.show-controls {
+  cursor: default;
+}
+.saver--dark {
+  --wall-a: #4a423a;
+  --wall-b: #37302a;
+  --wall-c: #2a2420;
+  --board: #3d3631;
+  --plank: #5d4632;
+  --plank-dark: #4a3626;
+  color: #e9e1d4;
+}
+
+.saver__wall {
+  position: absolute;
+  inset: 0 0 15% 0;
+  background: radial-gradient(
+    120% 100% at 32% 18%,
+    var(--wall-a),
+    var(--wall-b) 58%,
+    var(--wall-c)
+  );
+}
+/* Sunlight through a four-pane window, falling across the wall. */
+.saver__window {
+  position: absolute;
+  top: -18%;
+  left: -4%;
+  width: 58%;
+  height: 128%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 4%;
+  transform: skewX(-26deg) rotate(3deg);
+  filter: blur(12px);
+  opacity: 0.85;
+  mix-blend-mode: screen;
+  animation: sun-drift 70s ease-in-out infinite alternate;
+}
+.saver__window span {
+  background: linear-gradient(172deg, var(--light), var(--light-fade));
+}
+@keyframes sun-drift {
+  from {
+    translate: 0 0;
+    opacity: 0.78;
+  }
+  to {
+    translate: 9% 2%;
+    opacity: 0.95;
+  }
+}
+.saver__glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: radial-gradient(
+    46% 55% at 80% 8%,
+    rgb(255 196 128 / 0.38),
+    transparent 72%
+  );
+}
+.saver--dark .saver__window {
+  opacity: 0;
+  animation: none;
+}
+.saver--dark .saver__glow {
+  opacity: 1;
+}
+
+.saver__floor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 15%;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 calc(13% - 1px),
+      rgb(60 35 15 / 0.22) calc(13% - 1px) 13%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgb(255 255 255 / 0.05) 0 2px,
+      transparent 2px 6px
+    ),
+    linear-gradient(var(--plank), var(--plank-dark));
+}
+.saver__baseboard {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -2.2vh;
+  height: 2.2vh;
+  background: var(--board);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.5) inset,
+    0 3px 6px rgb(0 0 0 / 0.14);
+}
+
+/* ================= Frame ================= */
+.saver__stage {
+  position: absolute;
+  inset: 0 0 6vh;
+  display: grid;
+  place-items: center;
+}
+.frame {
+  --h: min(74vh, calc(86vw * 4 / 3));
+  --border: calc(var(--h) * 0.026);
+  position: relative;
+  height: var(--h);
+  aspect-ratio: 3 / 4;
+  padding: var(--border);
+  /* Light oak with a little grain. */
+  background:
+    repeating-linear-gradient(
+      90deg,
+      rgb(90 50 20 / 0.07) 0 1px,
+      transparent 1px 3px,
+      rgb(255 230 190 / 0.06) 3px 4px
+    ),
+    linear-gradient(135deg, #cfa572, #b98a54 38%, #d6ad7c 62%, #b88a56);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.35),
+    inset 0 -2px 0 rgb(0 0 0 / 0.18),
+    0 calc(var(--h) * 0.035) calc(var(--h) * 0.07) rgb(40 24 10 / 0.3),
+    0 4px 8px rgb(40 24 10 / 0.16);
+}
+.saver--dark .frame {
+  filter: brightness(0.86);
+}
+.frame__paper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  container-type: size;
+  box-shadow:
+    inset 0 0 0 1px rgb(0 0 0 / 0.1),
+    inset 0 3px 8px rgb(0 0 0 / 0.2);
+}
+.frame__glass {
+  position: absolute;
+  inset: var(--border);
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    rgb(255 255 255 / 0.16) 0%,
+    transparent 32%,
+    rgb(255 255 255 / 0.06) 58%,
+    transparent 68%
+  );
+  box-shadow: inset 0 3px 8px rgb(0 0 0 / 0.16);
+}
+
+/* ================= Wall clock & sticky note ================= */
+.wallclock {
+  position: absolute;
+  top: 9vh;
+  left: 8vw;
+  width: clamp(72px, 9vw, 150px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  filter: drop-shadow(0 8px 12px rgb(40 24 10 / 0.22));
+}
+.wallclock svg {
+  width: 100%;
+  overflow: visible;
+}
+.wallclock__rim {
+  fill: #2c2723;
+}
+.wallclock__face {
+  fill: #f8f5ef;
+}
+.saver--dark .wallclock__face {
+  fill: #e4dccd;
+}
+.wallclock__tick {
+  stroke: #2c2723;
+  stroke-width: 1.2;
+}
+.wallclock__tick--major {
+  stroke-width: 2.4;
+}
+.wallclock__hour,
+.wallclock__minute,
+.wallclock__second {
+  stroke-linecap: round;
+}
+.wallclock__hour {
+  stroke: #2c2723;
+  stroke-width: 3.6;
+}
+.wallclock__minute {
+  stroke: #2c2723;
+  stroke-width: 2.3;
+}
+.wallclock__second {
+  stroke: #c8322b;
+  stroke-width: 1;
+}
+.wallclock__pin {
+  fill: #c8322b;
+}
+.wallclock__date {
+  font-size: clamp(10px, 0.9vw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  filter: none;
+}
+
+.saver__note {
+  position: absolute;
+  top: 16vh;
+  right: 8vw;
+  width: clamp(120px, 12vw, 190px);
+  padding: 22px 16px 16px;
+  background: #f9e48d;
+  color: #2a2620;
+  font-family: 'Patrick Hand', cursive;
+  rotate: 3deg;
+  box-shadow: 0 10px 18px rgb(40 24 10 / 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.saver__note--break {
+  background: #cfe9df;
+}
+.saver__note small {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.7;
+}
+.saver__note strong {
+  font-family: var(--font);
+  font-size: clamp(26px, 2.6vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.saver__note span:last-child {
+  font-size: 16px;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.saver__tape {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 64px;
+  height: 22px;
+  translate: -50% 0;
+  rotate: -4deg;
+  background: rgb(255 255 255 / 0.55);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.08);
+}
+
+/* ================= Controls ================= */
+.saver__controls {
+  position: absolute;
+  left: 50%;
+  bottom: 4vh;
+  translate: -50% 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px;
+  border-radius: 999px;
+  background: rgb(22 20 18 / 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.show-controls .saver__controls {
+  opacity: 1;
+  pointer-events: auto;
+}
+.saver__controls button {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+}
+.saver__controls button:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+.saver__name {
+  min-width: 92px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+}
+.saver__hint {
+  position: absolute;
+  left: 50%;
+  bottom: 4.6vh;
+  translate: -50% 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0;
+  animation: hint 5s ease forwards;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.show-controls .saver__hint {
+  display: none;
+}
+@keyframes hint {
+  0%,
+  10% {
+    opacity: 0;
+  }
+  20%,
+  75% {
+    opacity: 0.55;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.saver--still .saver__window,
+.saver--still .pr__record::after {
+  animation: none;
+}
+
+@media (max-width: 700px) {
+  .wallclock {
+    top: 3vh;
+    left: 5vw;
+    width: 64px;
+  }
+  .wallclock__date {
+    display: none;
+  }
+  .saver__note {
+    top: 3vh;
+    right: 5vw;
+    width: 120px;
+    padding: 16px 12px 12px;
+  }
+}
+
+/* ================= Posters (sized in cqw/cqh of the paper) ================= */
+.mini {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.poster {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink, #1b1a18);
+}
+
+/* 1. Statement */
+.poster--statement {
+  --paper: #d9d3ca;
+  padding: 13cqw 11cqw 10cqw;
+}
+.ps__block {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.ps__line {
+  margin: 0;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 17cqw;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.ps__line sup {
+  position: relative;
+  top: -0.2em;
+  margin-left: 2.4cqw;
+  font-family: 'Libre Caslon Text', Georgia, serif;
+  font-size: 3.4cqw;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
+}
+.ps__foot {
+  border-top: 1px solid rgb(0 0 0 / 0.22);
+  padding-top: 3cqw;
+}
+.ps__caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 2cqw;
+  margin-top: 2cqw;
+  font-size: 2.3cqw;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+/* 2. Definition */
+.poster--definition {
+  --paper: #f8f7f3;
+  --ink: #1b1b1b;
+  padding: 0 12cqw;
+}
+.pd__body {
+  margin-top: 40cqh;
+}
+.pd__word {
+  margin: 0;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-weight: 400;
+  font-size: 12.5cqw;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.pd__meta {
+  margin: 2.4cqw 0 0;
+  font-family: 'Libre Caslon Text', Georgia, serif;
+  font-size: 3.1cqw;
+  color: #555;
+}
+.pd__body hr {
+  border: none;
+  border-top: 1px solid rgb(0 0 0 / 0.55);
+  margin: 4cqw 0;
+}
+.pd__text {
+  margin: 0;
+  font-family: 'Libre Caslon Text', Georgia, serif;
+  font-size: 3.7cqw;
+  line-height: 1.5;
+}
+.pd__chart {
+  margin-top: 6cqw;
+}
+.pd__caption {
+  margin: 2cqw 0 0;
+  font-family: 'Libre Caslon Text', Georgia, serif;
+  font-style: italic;
+  font-size: 2.6cqw;
+  color: #7a776f;
+}
+
+/* 3. Retro print */
+.poster--retro {
+  --paper: #efe4cb;
+  --ink: #1c1a17;
+  --red: #c8322b;
+  padding: 7cqw 7cqw 6cqw;
+  background:
+    radial-gradient(circle at 18% 8%, rgb(255 255 255 / 0.45), transparent 38%),
+    radial-gradient(circle at 85% 92%, rgb(140 90 30 / 0.16), transparent 48%),
+    repeating-linear-gradient(
+      0deg,
+      rgb(120 80 30 / 0.025) 0 1px,
+      transparent 1px 3px
+    ),
+    var(--paper);
+}
+.pr__head h2 {
+  margin: 0;
+  font-family: 'Oswald Variable', Impact, sans-serif;
+  font-weight: 700;
+  font-size: 13cqw;
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--red);
+  transform: skewX(-12deg) rotate(-4deg);
+  transform-origin: left bottom;
+}
+.pr__q {
+  font-size: 0.6em;
+  vertical-align: top;
+}
+.pr__ribbon {
+  display: inline-block;
+  margin: 3cqw 0 0;
+  padding: 1.3cqw 3cqw;
+  background: var(--red);
+  color: var(--paper);
+  font-family: 'Oswald Variable', Impact, sans-serif;
+  font-weight: 500;
+  font-size: 3cqw;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  rotate: -2deg;
+}
+.pr__hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6cqw;
+  align-items: end;
+  margin-top: 9cqw;
+}
+.pr__record {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    #141414 0 0.9cqw,
+    #272727 0.9cqw 1.15cqw
+  );
+  box-shadow: 0 2.4cqw 4cqw rgb(0 0 0 / 0.35);
+}
+.pr__record::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 20deg,
+    transparent,
+    rgb(255 255 255 / 0.14) 8%,
+    transparent 18%,
+    transparent 50%,
+    rgb(255 255 255 / 0.1) 58%,
+    transparent 68%
+  );
+  animation: spin 14s linear infinite;
+}
+@keyframes spin {
+  to {
+    rotate: 360deg;
+  }
+}
+.pr__label {
+  position: absolute;
+  inset: 31%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--red);
+  color: var(--paper);
+  text-align: center;
+  box-shadow: 0 0 0 0.6cqw #1b1b1b;
+}
+.pr__label strong {
+  font-family: 'Oswald Variable', Impact, sans-serif;
+  font-size: 4.6cqw;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.pr__label small {
+  font-family: 'Oswald Variable', Impact, sans-serif;
+  font-size: 2cqw;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.pr__bars {
+  padding-bottom: 2cqw;
+}
+.pr__tagline {
+  margin: auto 0 0;
+  padding: 0 4cqw;
+  font-family: 'Libre Caslon Text', Georgia, serif;
+  font-style: italic;
+  font-size: 4.2cqw;
+  line-height: 1.3;
+  text-align: center;
+}
+.pr__tagline::before,
+.pr__tagline::after {
+  content: '';
+  display: block;
+  width: 14cqw;
+  height: 0.5cqw;
+  margin: 2.5cqw auto;
+  background: var(--red);
+}
+.pr__bottom {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 4cqw;
+  align-items: end;
+  margin-top: auto;
+}
+.pr__notes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-family: 'Libre Caslon Text', Georgia, serif;
+  font-size: 2.7cqw;
+  line-height: 1.45;
+}
+.pr__notes li::before {
+  content: '■';
+  color: var(--red);
+  font-size: 0.7em;
+  margin-right: 1.4cqw;
+  vertical-align: 0.15em;
+}
+.pr__stamp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2cqw 1.5cqw;
+  border: 0.8cqw solid var(--red);
+  outline: 0.3cqw solid var(--red);
+  outline-offset: -2.2cqw;
+  font-family: 'Oswald Variable', Impact, sans-serif;
+  text-transform: uppercase;
+  text-align: center;
+}
+.pr__stamp small {
+  font-size: 2.3cqw;
+  letter-spacing: 0.1em;
+  padding: 0.8cqw 0;
+}
+.pr__stamp strong {
+  font-size: 9cqw;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+/* 4. Sketch */
+.poster--sketch {
+  --paper: #f4eee2;
+  --ink: #171615;
+  padding: 9cqw 7cqw 0;
+  align-items: center;
+}
+.pk__text {
+  margin: 0;
+  font-family: 'Patrick Hand', 'Comic Neue', cursive;
+  font-weight: 400;
+  font-size: 7cqw;
+  line-height: 1.22;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+.pk__text span {
+  display: block;
+}
+.pk__scene {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 0.85fr 1.25fr;
+  gap: 5cqw;
+  align-items: end;
+  width: 100%;
+  margin-top: 7cqw;
+}
+.pk__chart p {
+  margin: 1.5cqw 0 0;
+  font-family: 'Patrick Hand', cursive;
+  font-size: 3.6cqw;
+  text-align: center;
+  color: #d13b2f;
+}
+.pk__stripes {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 20cqh;
+  opacity: 0.9;
+}
+.pk__stripes .mini {
+  height: 100%;
+}
+
+/* 5. Quote */
+.poster--quote {
+  --ink: #1d1c1a;
+  padding: 12cqw 11cqw 9cqw;
+}
+.pq__mark {
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 34cqw;
+  line-height: 0.62;
+  height: 16cqw;
+  opacity: 0.22;
+}
+.poster--quote blockquote {
+  margin: 0;
+  font-family: 'DM Serif Display', Georgia, serif;
+  font-size: 8.6cqw;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+.poster--quote blockquote.is-medium {
+  font-size: 6.6cqw;
+}
+.poster--quote blockquote.is-long {
+  font-size: 5cqw;
+  line-height: 1.22;
+}
+.pq__author {
+  margin: 5cqw 0 0;
+  font-family: 'Libre Caslon Text', Georgia, serif;
+  font-style: italic;
+  font-size: 3.4cqw;
+  opacity: 0.8;
+}
+.pq__foot {
+  display: flex;
+  align-items: center;
+  gap: 3cqw;
+  margin-top: auto;
+  font-size: 2.5cqw;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1.6;
+  opacity: 0.7;
+}
+.pq__ring {
+  width: 9cqw;
+  flex: none;
+}

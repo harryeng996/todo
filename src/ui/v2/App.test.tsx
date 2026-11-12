@@ -1,6 +1,6 @@
-import { act, render, screen, within } from '@testing-library/react'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { reportStorageError } from '../../lib/storage.ts'
 import App from './App.tsx'
 
@@ -259,5 +259,47 @@ describe('v2 settings screen', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Storage is full',
     )
+  })
+})
+
+describe('v2 screensaver', () => {
+  it('opens from the sidebar, steps through pictures and closes on a key', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await screen.findByRole('heading', { level: 1 })
+    await user.click(
+      screen.getByRole('button', { name: 'Show the screensaver' }),
+    )
+    const saver = await screen.findByRole('dialog', { name: /Screensaver/ })
+    expect(within(saver).getByText('Plan.')).toBeInTheDocument()
+    await user.keyboard('{ArrowRight}')
+    expect(await within(saver).findByText('momentum')).toBeInTheDocument()
+    await user.keyboard('{Escape}')
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('dialog', { name: /Screensaver/ }),
+      ).not.toBeInTheDocument(),
+    )
+  })
+
+  it('starts by itself after the idle time', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    try {
+      localStorage.setItem(
+        'todoapp.settings.v1',
+        JSON.stringify({ screensaverIdleMin: 1 }),
+      )
+      render(<App />)
+      await screen.findByRole('heading', { level: 1 })
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(62_000)
+      })
+      expect(
+        await screen.findByRole('dialog', { name: /Screensaver/ }),
+      ).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

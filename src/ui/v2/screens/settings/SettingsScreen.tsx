@@ -1,5 +1,6 @@
 import {
   Database,
+  Image as ImageIcon,
   Monitor,
   Moon,
   MonitorPlay,
@@ -23,6 +24,7 @@ import { navigate, replaceRoute, useRoute } from '../../lib/router.ts'
 import { useAppSettings } from '../../state/appContext.ts'
 import { useWeightGoal } from '../../state/weightGoal.ts'
 import { DataSettings } from './DataSettings.tsx'
+import { ScreensaverSettings } from './ScreensaverSettings.tsx'
 import { PomodoroSettings } from './PomodoroSettings.tsx'
 import { QuoteSettings } from './QuoteSettings.tsx'
 import { TargetSettings } from './TargetSettings.tsx'
@@ -50,6 +52,7 @@ export function SettingsScreen() {
     ...(settings.youtube
       ? [{ id: 'videos', label: 'Videos', icon: MonitorPlay }]
       : []),
+    { id: 'screensaver', label: 'Screensaver', icon: ImageIcon },
     { id: 'data', label: 'Data', icon: Database },
   ]
   const [active, setActive] = useState(route.section ?? 'appearance')
@@ -136,6 +139,7 @@ export function SettingsScreen() {
           {settings.pomodoro && <PomodoroSettings id={sectionId('pomodoro')} />}
           <QuoteSettings id={sectionId('quotes')} />
           {settings.youtube && <VideoSettings id={sectionId('videos')} />}
+          <ScreensaverSettings id={sectionId('screensaver')} />
           <DataSettings id={sectionId('data')} />
         </div>
       </div>

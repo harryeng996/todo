@@ -1,8 +1,9 @@
-import { CheckCheck, Moon, Sun } from 'lucide-react'
+import { CheckCheck, Image as ImageIcon, Moon, Sun } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { routeHref, useRoute, type Screen } from '../lib/router.ts'
 import { useAppSettings } from '../state/appContext.ts'
+import { useScreensaver } from '../state/screensaver.ts'
 import { FocusPill } from './FocusPill.tsx'
 import { navItems } from './nav.ts'
 import { StorageBanner } from './StorageBanner.tsx'
@@ -15,6 +16,7 @@ interface ShellProps {
 export function Shell({ screens }: ShellProps) {
   const route = useRoute()
   const { settings, update, resolvedTheme } = useAppSettings()
+  const screensaver = useScreensaver()
   const items = navItems(settings)
   // A screen switched off in Settings (e.g. Body) falls back to Home.
   const screen = items.some((i) => i.screen === route.screen)
@@ -82,6 +84,18 @@ export function Shell({ screens }: ShellProps) {
             </a>
           ))}
         </nav>
+        <button
+          type="button"
+          className="theme-toggle"
+          onClick={screensaver.start}
+          aria-label="Show the screensaver"
+          title="Show the screensaver"
+        >
+          <span className="theme-toggle__icon">
+            <ImageIcon size={17} aria-hidden="true" />
+          </span>
+          <span className="nav-link__label">Screensaver</span>
+        </button>
         <button
           type="button"
           className="theme-toggle"

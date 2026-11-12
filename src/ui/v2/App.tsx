@@ -20,6 +20,7 @@ import { HomeScreen } from './screens/home/HomeScreen.tsx'
 import { SettingsScreen } from './screens/settings/SettingsScreen.tsx'
 import { TasksScreen } from './screens/tasks/TasksScreen.tsx'
 import { Shell } from './shell/Shell.tsx'
+import { ScreensaverProvider } from './shell/ScreensaverProvider.tsx'
 import { VideoDockProvider } from './shell/VideoDock.tsx'
 import { useNow } from './lib/useNow.ts'
 import { AppSettingsProvider, TargetsProvider } from './state/AppProviders.tsx'
@@ -78,7 +79,9 @@ export default function App() {
                       <VideoDockProvider>
                         <CelebrateSessions />
                         <TitleTicker />
-                        <Shell screens={screens} />
+                        <ScreensaverProvider>
+                          <Shell screens={screens} />
+                        </ScreensaverProvider>
                       </VideoDockProvider>
                     </ConfettiProvider>
                   </ToastProvider>
