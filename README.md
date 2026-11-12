@@ -1,6 +1,16 @@
-# To-do (sketch style)
+# To-do
 
-A small single-page to-do app with a hand-drawn look.
+A daily to-do app with a Pomodoro timer, YouTube soundtrack, weight tracking and quotes.
+It is a PWA and works offline.
+
+## Two interfaces
+
+- **v2** (default): separate screens (Home, Tasks, Focus, Body, Settings) with charts and
+  statistics, light and dark themes and animations.
+- **v1**: the original single page with a hand-drawn look (git tag `v1`).
+
+Switch in Settings ("Use the new interface"). Both read the same data, so nothing is lost;
+the page reloads and only the chosen interface is loaded.
 
 ## Run
 
@@ -20,6 +30,18 @@ pnpm dev        # http://localhost:5173
 | `pnpm lint`    | Lint with oxlint                      |
 | `pnpm format`  | Format with Prettier                  |
 
-Everything is saved in the browser: todos, target, quote position and player settings live in
-`localStorage`
-The music folder is read in place and never copied. Chrome/Edge remember the folder; Firefox asks again each visit.
+## Code layout
+
+| Path                   | What                                                           |
+| ---------------------- | -------------------------------------------------------------- |
+| `src/main.tsx`         | Loads v1 or v2 by the saved setting                            |
+| `src/state`, `src/lib` | Shared data and logic (todos, Pomodoro, weight, quotes, video) |
+| `src/hooks`            | Shared non-visual hooks (photos, YouTube player, grid range)   |
+| `src/ui/v1`            | The original interface and its styles                          |
+| `src/ui/v2`            | The new interface: `shell`, `screens`, `components`, `charts`  |
+
+## Data
+
+Everything is saved in this browser only: settings, targets, quotes and the weight log in
+`localStorage`; todos, focus sessions and photos in IndexedDB. Nothing is uploaded.
+The v2 goal weight is stored separately (`todoapp.v2.weightGoal.v1`) and v1 ignores it.

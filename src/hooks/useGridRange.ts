@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react'
-import {
-  addDays,
-  dayOfWeek,
-  daysBetween,
-  type DateKey,
-} from '../lib/date.ts'
+import { addDays, dayOfWeek, daysBetween, type DateKey } from '../lib/date.ts'
 import { createJsonStore } from '../lib/storage.ts'
 
 export type RangePreset = '1m' | '3m' | '6m' | '1y'

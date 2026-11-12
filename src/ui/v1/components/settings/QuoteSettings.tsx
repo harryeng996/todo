@@ -1,7 +1,10 @@
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { MAX_LENGTH } from '../../../../lib/limits.ts'
-import { INTERVAL_OPTIONS, type QuoteOrder } from '../../../../state/quoteLibrary.ts'
+import {
+  INTERVAL_OPTIONS,
+  type QuoteOrder,
+} from '../../../../state/quoteLibrary.ts'
 import { useQuoteLibrary } from '../../../../state/useQuoteLibrary.ts'
 import { SketchButton } from '../sketch/SketchButton.tsx'
 import { SketchCheckbox } from '../sketch/SketchCheckbox.tsx'

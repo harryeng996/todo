@@ -12,7 +12,10 @@ import { embedUrl, watchUrl } from '../../../../lib/youtube.ts'
 import { useVideos, type SavedVideo } from '../../../../state/useVideos.ts'
 import { SketchBox } from '../sketch/SketchBox.tsx'
 import { SketchButton } from '../sketch/SketchButton.tsx'
-import { useYouTubePlayer, type PlayerInfo } from '../../../../hooks/useYouTubePlayer.ts'
+import {
+  useYouTubePlayer,
+  type PlayerInfo,
+} from '../../../../hooks/useYouTubePlayer.ts'
 
 /** Past this many seconds in, ⏮ restarts the video instead of going back. */
 const RESTART_THRESHOLD_S = 3

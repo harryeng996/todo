@@ -1,6 +1,10 @@
 import { Camera, Pencil } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import { addDays, relativeDayLabel, type DateKey } from '../../../../lib/date.ts'
+import {
+  addDays,
+  relativeDayLabel,
+  type DateKey,
+} from '../../../../lib/date.ts'
 import { backfillThumbnails } from '../../../../lib/photos.ts'
 import {
   chartPoints,
