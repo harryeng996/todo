@@ -1,4 +1,10 @@
 import { useEffect, useRef } from 'react'
+import {
+  formatCountdown,
+  phaseLabel,
+  phaseMs,
+  remainingMs,
+} from '../../state/pomodoro.ts'
 import { PomodoroProvider } from '../../state/PomodoroContext.tsx'
 import { QuoteProvider } from '../../state/QuoteContext.tsx'
 import { TodoProvider } from '../../state/TodoContext.tsx'
@@ -9,16 +15,19 @@ import { ConfettiProvider } from './components/Confetti.tsx'
 import { useConfetti } from './components/confettiContext.ts'
 import { ToastProvider } from './components/Toast.tsx'
 import { ComingSoon } from './screens/ComingSoon.tsx'
+import { FocusScreen } from './screens/focus/FocusScreen.tsx'
 import { HomeScreen } from './screens/home/HomeScreen.tsx'
 import { SettingsScreen } from './screens/settings/SettingsScreen.tsx'
 import { TasksScreen } from './screens/tasks/TasksScreen.tsx'
 import { Shell } from './shell/Shell.tsx'
+import { VideoDockProvider } from './shell/VideoDock.tsx'
+import { useNow } from './lib/useNow.ts'
 import { AppSettingsProvider, TargetsProvider } from './state/AppProviders.tsx'
 
 const screens = {
   home: () => <HomeScreen />,
   tasks: () => <TasksScreen />,
-  focus: () => <ComingSoon title="Focus" />,
+  focus: () => <FocusScreen />,
   body: () => <ComingSoon title="Body" />,
   settings: () => <SettingsScreen />,
 }
@@ -35,6 +44,26 @@ function CelebrateSessions() {
   return null
 }
 
+const BASE_TITLE = document.title
+
+/** While the timer runs, the tab title shows the countdown (as in v1). */
+function TitleTicker() {
+  const { timer, config } = usePomodoro()
+  const running = timer.status === 'running'
+  const now = useNow(1000, running)
+  const left = Math.min(
+    remainingMs(timer, now.getTime()),
+    phaseMs(timer.phase, config),
+  )
+  const title = running
+    ? `${formatCountdown(left)} · ${phaseLabel(timer.phase)}`
+    : BASE_TITLE
+  useEffect(() => {
+    document.title = title
+  }, [title])
+  return null
+}
+
 export default function App() {
   return (
     <AppSettingsProvider>
@@ -46,8 +75,11 @@ export default function App() {
                 <TargetsProvider>
                   <ToastProvider>
                     <ConfettiProvider>
-                      <CelebrateSessions />
-                      <Shell screens={screens} />
+                      <VideoDockProvider>
+                        <CelebrateSessions />
+                        <TitleTicker />
+                        <Shell screens={screens} />
+                      </VideoDockProvider>
                     </ConfettiProvider>
                   </ToastProvider>
                 </TargetsProvider>

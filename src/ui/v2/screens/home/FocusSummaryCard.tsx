@@ -11,6 +11,7 @@ import { useToday } from '../../../../state/useToday.ts'
 import { Button, IconButton } from '../../components/Button.tsx'
 import { Card } from '../../components/Card.tsx'
 import { ProgressRing } from '../../components/ProgressRing.tsx'
+import { phaseColor } from '../../lib/phase.ts'
 import { navigate } from '../../lib/router.ts'
 import { useNow } from '../../lib/useNow.ts'
 
@@ -23,7 +24,7 @@ export function FocusSummaryCard() {
   const total = phaseMs(timer.phase, config)
   const todays = sessions.filter((s) => s.date === today)
   const minutes = todays.reduce((sum, s) => sum + s.minutes, 0)
-  const color = timer.phase === 'focus' ? 'var(--focus)' : 'var(--break)'
+  const color = phaseColor(timer.phase)
 
   return (
     <Card

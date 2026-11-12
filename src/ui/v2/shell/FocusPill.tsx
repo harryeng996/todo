@@ -7,6 +7,7 @@ import {
   remainingMs,
 } from '../../../state/pomodoro.ts'
 import { usePomodoro } from '../../../state/usePomodoro.ts'
+import { phaseColor } from '../lib/phase.ts'
 import { navigate } from '../lib/router.ts'
 import { useNow } from '../lib/useNow.ts'
 import { useAppSettings } from '../state/appContext.ts'
@@ -20,7 +21,7 @@ export function FocusPill({ hidden }: { hidden: boolean }) {
   const show = settings.pomodoro && !hidden && timer.status !== 'idle'
   const left = remainingMs(timer, now.getTime())
   const progress = 1 - left / phaseMs(timer.phase, config)
-  const color = timer.phase === 'focus' ? 'var(--focus)' : 'var(--break)'
+  const color = phaseColor(timer.phase)
 
   return (
     <AnimatePresence>

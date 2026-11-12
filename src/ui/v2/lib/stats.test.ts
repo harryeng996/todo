@@ -5,6 +5,8 @@ import { parseHash } from './router.ts'
 import {
   daySeries,
   greeting,
+  minutesByHour,
+  minutesByTask,
   movingAverage,
   streakOf,
   sumDays,
@@ -152,5 +154,37 @@ describe('helpers', () => {
   it('greets by hour', () => {
     expect(greeting(8)).toBe('Good morning')
     expect(greeting(20)).toBe('Good evening')
+  })
+})
+
+describe('focus breakdowns', () => {
+  const at = (h: number, minutes: number, taskTitle: string | null) => ({
+    id: `${h}${taskTitle}`,
+    start: new Date(2026, 10, 12, h, 5).getTime(),
+    end: new Date(2026, 10, 12, h, 30).getTime(),
+    date: '2026-11-12',
+    minutes,
+    taskId: null,
+    taskTitle,
+  })
+
+  it('buckets minutes by starting hour', () => {
+    const hours = minutesByHour([
+      at(9, 25, null),
+      at(9, 25, 'A'),
+      at(14, 50, 'B'),
+    ])
+    expect(hours[9]).toBe(50)
+    expect(hours[14]).toBe(50)
+    expect(hours.reduce((a, b) => a + b)).toBe(100)
+  })
+
+  it('totals by task, most time first', () => {
+    expect(
+      minutesByTask([at(9, 25, 'A'), at(10, 25, null), at(11, 25, 'A')]),
+    ).toEqual([
+      { title: 'A', minutes: 50, count: 2 },
+      { title: 'No task', minutes: 25, count: 1 },
+    ])
   })
 })

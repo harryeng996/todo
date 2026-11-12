@@ -951,3 +951,17 @@
     border-radius: var(--r-md);
   }
 }
+
+/* ---------- Rolling digits ---------- */
+.flip {
+  display: inline-flex;
+}
+.flip__char {
+  display: inline-grid;
+  overflow: hidden;
+  width: 0.62em;
+  justify-items: center;
+}
+.flip__char > span {
+  grid-area: 1 / 1;
+}

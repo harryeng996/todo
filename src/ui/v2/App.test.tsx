@@ -126,3 +126,37 @@ describe('v2 tasks screen', () => {
     ).toBeInTheDocument()
   })
 })
+
+describe('v2 focus screen', () => {
+  it('runs the timer and keeps it visible on other screens', async () => {
+    const user = userEvent.setup()
+    location.hash = '#/focus'
+    render(<App />)
+    expect(
+      await screen.findByRole('heading', { name: 'Focus', level: 1 }),
+    ).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Start' }))
+    expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument()
+    expect(document.title).toMatch(/· Focus$/)
+
+    act(() => {
+      location.hash = '#/'
+      window.dispatchEvent(new HashChangeEvent('hashchange'))
+    })
+    expect(
+      await screen.findByRole('button', { name: 'Pause timer' }),
+    ).toBeInTheDocument()
+  })
+
+  it('shows focus statistics with range and task filters', async () => {
+    location.hash = '#/focus'
+    render(<App />)
+    await screen.findByRole('heading', { name: 'Focus', level: 1 })
+    expect(screen.getByText('Statistics')).toBeInTheDocument()
+    expect(screen.getByLabelText('Filter by task')).toBeInTheDocument()
+    expect(
+      screen.getByRole('radiogroup', { name: 'Statistics range' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('By task')).toBeInTheDocument()
+  })
+})

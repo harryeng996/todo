@@ -168,3 +168,34 @@ export function greeting(hour: number): string {
   if (hour < 18) return 'Good afternoon'
   return 'Good evening'
 }
+
+/** Focus minutes by the hour each session started (0–23), local time. */
+export function minutesByHour(sessions: readonly FocusSession[]): number[] {
+  const hours = Array<number>(24).fill(0)
+  for (const s of sessions) hours[new Date(s.start).getHours()] += s.minutes
+  return hours
+}
+
+export interface TaskShare {
+  title: string
+  minutes: number
+  count: number
+}
+
+/** Focus time per task (sessions without one are grouped), most first. */
+export function minutesByTask(
+  sessions: readonly FocusSession[],
+  noTask = 'No task',
+): TaskShare[] {
+  const map = new Map<string, TaskShare>()
+  for (const s of sessions) {
+    const title = s.taskTitle || noTask
+    const entry = map.get(title) ?? { title, minutes: 0, count: 0 }
+    entry.minutes += s.minutes
+    entry.count++
+    map.set(title, entry)
+  }
+  return [...map.values()].sort(
+    (a, b) => b.minutes - a.minutes || a.title.localeCompare(b.title),
+  )
+}

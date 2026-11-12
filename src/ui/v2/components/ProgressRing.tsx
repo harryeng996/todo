@@ -65,7 +65,7 @@ export function ProgressRing({
           transition={
             duration
               ? { duration, ease: [0.22, 1, 0.36, 1] }
-              : { duration: 0.25, ease: 'linear' }
+              : { duration: 1, ease: 'linear' }
           }
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
