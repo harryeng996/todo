@@ -5,6 +5,7 @@ export type TodoAction =
   | { type: 'add'; todo: Todo }
   | { type: 'toggle'; id: string }
   | { type: 'delete'; id: string }
+  | { type: 'rename'; id: string; title: string }
 
 export function todoReducer(todos: Todo[], action: TodoAction): Todo[] {
   switch (action.type) {
@@ -16,6 +17,10 @@ export function todoReducer(todos: Todo[], action: TodoAction): Todo[] {
       )
     case 'delete':
       return todos.filter((todo) => todo.id !== action.id)
+    case 'rename':
+      return todos.map((todo) =>
+        todo.id === action.id ? { ...todo, title: action.title } : todo,
+      )
   }
 }
 

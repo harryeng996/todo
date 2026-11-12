@@ -21,4 +21,14 @@ describe('todoReducer', () => {
   it('deletes by id', () => {
     expect(todoReducer([milk], { type: 'delete', id: milk.id })).toEqual([])
   })
+
+  it('renames by id, keeping the rest', () => {
+    const [renamed] = todoReducer([milk], {
+      type: 'rename',
+      id: milk.id,
+      title: 'Oat milk',
+    })
+    expect(renamed).toEqual({ ...milk, title: 'Oat milk' })
+    expect(milk.title).not.toBe('Oat milk')
+  })
 })
