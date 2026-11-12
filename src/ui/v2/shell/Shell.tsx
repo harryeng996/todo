@@ -1,10 +1,11 @@
 import { CheckCheck, Moon, Sun } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { routeHref, useRoute, type Screen } from '../lib/router.ts'
 import { useAppSettings } from '../state/appContext.ts'
 import { FocusPill } from './FocusPill.tsx'
 import { navItems } from './nav.ts'
+import { StorageBanner } from './StorageBanner.tsx'
 
 interface ShellProps {
   screens: Record<Screen, () => ReactNode>
@@ -20,8 +21,21 @@ export function Shell({ screens }: ShellProps) {
     ? route.screen
     : 'home'
 
+  // On navigation (not the first load): back to the top, and move focus to the
+  // new screen's heading once it has animated in, for keyboard and screen-reader users.
+  const firstScreen = useRef(true)
   useEffect(() => {
+    if (firstScreen.current) {
+      firstScreen.current = false
+      return
+    }
     window.scrollTo({ top: 0 })
+    const timer = setTimeout(() => {
+      document
+        .querySelector<HTMLElement>('#main h1')
+        ?.focus({ preventScroll: true })
+    }, 320)
+    return () => clearTimeout(timer)
   }, [screen])
 
   const toggleTheme = () =>
@@ -29,6 +43,17 @@ export function Shell({ screens }: ShellProps) {
 
   return (
     <div className="shell">
+      <a
+        className="skip-link"
+        href="#main"
+        onClick={(e) => {
+          e.preventDefault()
+          document.querySelector<HTMLElement>('#main h1')?.focus()
+        }}
+      >
+        Skip to content
+      </a>
+      <StorageBanner />
       <aside className="sidebar" aria-label="Main">
         <a className="brand" href={routeHref('home')}>
           <span className="brand__mark">

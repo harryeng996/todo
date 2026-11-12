@@ -426,3 +426,74 @@ body:has(.focus-pill) .video-float.is-mini {
     bottom: calc(var(--tabbar-h) + 76px + env(safe-area-inset-bottom, 0px));
   }
 }
+
+/* ---------- Skip link & storage banner ---------- */
+.skip-link {
+  position: fixed;
+  left: 16px;
+  top: -60px;
+  z-index: 200;
+  padding: 10px 16px;
+  border-radius: var(--r-sm);
+  background: var(--accent);
+  color: var(--text-on-accent);
+  font-weight: 650;
+  text-decoration: none;
+  transition: top 0.15s;
+}
+.skip-link:focus {
+  top: 16px;
+}
+h1:focus {
+  outline: none;
+}
+/* Headings get focus after navigation for screen readers; no visible ring. */
+h1:focus-visible {
+  box-shadow: none;
+}
+.storage-banner {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(680px, calc(100vw - 32px));
+  padding: 12px 12px 12px 16px;
+  border-radius: var(--r-md);
+  background: var(--danger-soft);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--danger) 35%, transparent);
+  box-shadow: var(--shadow-lg);
+  font-size: 13.5px;
+}
+.storage-banner > svg {
+  color: var(--danger);
+  flex: none;
+}
+.storage-banner p {
+  flex: 1;
+}
+.storage-banner__link {
+  border: none;
+  background: var(--danger);
+  color: #fff;
+  font-weight: 650;
+  font-size: 12.5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  flex: none;
+}
+.storage-banner__close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  color: var(--text-2);
+  flex: none;
+}

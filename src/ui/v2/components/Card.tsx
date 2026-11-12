@@ -41,7 +41,7 @@ export function ScreenHeader({
     <motion.header className="screen-header" variants={riseIn}>
       <div className="screen-header__text">
         {eyebrow && <p className="screen-header__eyebrow">{eyebrow}</p>}
-        <h1>{title}</h1>
+        <h1 tabIndex={-1}>{title}</h1>
         {subtitle && <p className="screen-header__subtitle">{subtitle}</p>}
       </div>
       {actions && <div className="screen-header__actions">{actions}</div>}

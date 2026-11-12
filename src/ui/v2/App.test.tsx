@@ -1,6 +1,7 @@
 import { act, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { reportStorageError } from '../../lib/storage.ts'
 import App from './App.tsx'
 
 beforeEach(() => {
@@ -209,5 +210,54 @@ describe('v2 body screen', () => {
     await user.type(input, '76')
     await user.click(screen.getByRole('button', { name: 'Save' }))
     expect(await screen.findByText('20%')).toBeInTheDocument() // 80 → 79.2 of 80 → 76
+  })
+})
+
+describe('v2 settings screen', () => {
+  async function openSettings() {
+    location.hash = '#/settings'
+    render(<App />)
+    await screen.findByRole('heading', { name: 'Settings', level: 1 })
+  }
+
+  it('adds a target that Home then counts down', async () => {
+    const user = userEvent.setup()
+    await openSettings()
+    await user.click(screen.getByRole('button', { name: 'Add' }))
+    await user.type(screen.getByLabelText('Name'), 'Marathon')
+    const final = screen.getByLabelText('Final day')
+    await user.type(final, '2099-01-01')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('Marathon')).toBeInTheDocument()
+    expect(
+      JSON.parse(localStorage.getItem('todoapp.targets.v2')!)[0],
+    ).toMatchObject({ title: 'Marathon', endDate: '2099-01-01' })
+  })
+
+  it('changes the focus length with the stepper', async () => {
+    const user = userEvent.setup()
+    await openSettings()
+    await user.click(screen.getByRole('button', { name: 'More focus' }))
+    expect(screen.getByLabelText('Focus (min)')).toHaveValue(30)
+  })
+
+  it('adds a quote of your own', async () => {
+    const user = userEvent.setup()
+    await openSettings()
+    await user.type(screen.getByLabelText('Quote'), 'Small steps.')
+    await user.type(screen.getByLabelText('Author'), 'Me')
+    await user.click(screen.getByRole('button', { name: 'Add quote' }))
+    await user.click(screen.getByRole('radio', { name: 'Mine' }))
+    expect(screen.getByText('Small steps.')).toBeInTheDocument()
+  })
+
+  it('warns when storage is full', async () => {
+    await openSettings()
+    act(() =>
+      reportStorageError(new DOMException('full', 'QuotaExceededError')),
+    )
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Storage is full',
+    )
   })
 })
