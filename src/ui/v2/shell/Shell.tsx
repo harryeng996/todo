@@ -1,4 +1,4 @@
-import { CheckCheck, Image as ImageIcon, Moon, Sun } from 'lucide-react'
+import { CheckCheck, Clock3, Moon, Sun } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, type ReactNode } from 'react'
 import { routeHref, useRoute, type Screen } from '../lib/router.ts'
@@ -92,7 +92,7 @@ export function Shell({ screens }: ShellProps) {
           title="Show the screensaver"
         >
           <span className="theme-toggle__icon">
-            <ImageIcon size={17} aria-hidden="true" />
+            <Clock3 size={17} aria-hidden="true" />
           </span>
           <span className="nav-link__label">Screensaver</span>
         </button>

@@ -5,15 +5,10 @@ import type { WeightUnit } from '../lib/weight.ts'
 /** v1: the original sketch-style page. v2: the multi-screen redesign. */
 export type UiVersion = 'v1' | 'v2'
 export type ThemeChoice = 'system' | 'light' | 'dark'
-/** v2 screensaver picture styles. */
-export type PosterId = 'statement' | 'definition' | 'retro' | 'sketch' | 'quote'
-export const POSTER_IDS: readonly PosterId[] = [
-  'statement',
-  'definition',
-  'retro',
-  'sketch',
-  'quote',
-]
+/** v2 screensaver colours; 'auto' follows the time of day. */
+export type SaverTheme = 'auto' | 'dusk' | 'ocean' | 'forest' | 'sunrise' | 'graphite'
+/** v2 screensaver arrangement. */
+export type SaverLayout = 'centered' | 'standby' | 'minimal'
 
 export interface Settings {
   music: boolean
@@ -28,12 +23,14 @@ export interface Settings {
   reduceMotion: boolean
   /** v2 only: minutes without input before the screensaver starts; 0 = never. */
   screensaverIdleMin: number
-  /** v2 only: seconds each picture stays up. */
-  screensaverIntervalSec: number
-  /** v2 only: the picture styles in rotation (at least one). */
-  screensaverPosters: PosterId[]
-  /** v2 only: an analog clock on the wall. */
-  screensaverClock: boolean
+  /** v2 only. */
+  screensaverTheme: SaverTheme
+  /** v2 only. */
+  screensaverLayout: SaverLayout
+  /** v2 only: the glass widgets with today's numbers and mini charts. */
+  screensaverWidgets: boolean
+  /** v2 only. */
+  screensaverSeconds: boolean
   /** v2 only: ask the browser to keep the screen on while it shows. */
   screensaverWakeLock: boolean
 }
@@ -48,9 +45,10 @@ const DEFAULTS: Settings = {
   theme: 'system',
   reduceMotion: false,
   screensaverIdleMin: 5,
-  screensaverIntervalSec: 30,
-  screensaverPosters: [...POSTER_IDS],
-  screensaverClock: true,
+  screensaverTheme: 'auto',
+  screensaverLayout: 'centered',
+  screensaverWidgets: true,
+  screensaverSeconds: false,
   screensaverWakeLock: false,
 }
 

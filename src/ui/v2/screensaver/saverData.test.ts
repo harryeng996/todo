@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Todo } from '../../../types/todo.ts'
-import { buildPosterData, definitions, hm } from './posterData.ts'
+import { buildSaverData, hm } from './saverData.ts'
 
 const todo = (date: string, done: boolean): Todo => ({
   id: `${date}${Math.random()}`,
@@ -21,9 +21,9 @@ const base = {
   targets: [],
 }
 
-describe('poster data', () => {
+describe('screensaver data', () => {
   it('summarises tasks for today, the week and the streak', () => {
-    const data = buildPosterData({
+    const data = buildSaverData({
       ...base,
       todos: [
         todo('2026-11-13', true),
@@ -44,36 +44,32 @@ describe('poster data', () => {
     expect(data.weight).toBeNull()
   })
 
-  it('writes definitions only for what there is data for', () => {
-    const data = buildPosterData({ ...base, todos: [todo('2026-11-13', true)] })
-    expect(definitions(data).map((d) => d.word)).toEqual(['momentum'])
-
-    const richer = buildPosterData({
+  it('picks the next target and the weight trend', () => {
+    const data = buildSaverData({
       ...base,
       weightTracking: true,
       log: {
         '2026-10-01': { kg: 80, photos: [] },
         '2026-11-12': { kg: 78.5, photos: [] },
       },
-      todos: [todo('2026-11-13', true), todo('2026-11-12', true)],
+      todos: [],
       targets: [
         {
-          id: 't',
+          id: 'a',
+          title: 'Old',
+          startDate: '2026-01-01',
+          endDate: '2026-02-01',
+        },
+        {
+          id: 'b',
           title: 'Exam',
           startDate: '2026-11-01',
           endDate: '2026-11-23',
         },
       ],
     })
-    const words = definitions(richer)
-    expect(words.map((d) => d.word)).toEqual([
-      'momentum',
-      'streak',
-      'progress',
-      'deadline',
-    ])
-    expect(words[2].text).toContain('1.5 kg lighter')
-    expect(words[3].text).toContain('10 days until “Exam”')
+    expect(data.target).toMatchObject({ title: 'Exam', daysLeft: 10 })
+    expect(data.weight).toMatchObject({ current: 78.5, change30: -1.5 })
   })
 
   it('formats minutes', () => {

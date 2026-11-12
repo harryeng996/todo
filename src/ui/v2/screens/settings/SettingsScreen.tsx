@@ -1,6 +1,6 @@
 import {
   Database,
-  Image as ImageIcon,
+  Clock3,
   Monitor,
   Moon,
   MonitorPlay,
@@ -52,7 +52,7 @@ export function SettingsScreen() {
     ...(settings.youtube
       ? [{ id: 'videos', label: 'Videos', icon: MonitorPlay }]
       : []),
-    { id: 'screensaver', label: 'Screensaver', icon: ImageIcon },
+    { id: 'screensaver', label: 'Screensaver', icon: Clock3 },
     { id: 'data', label: 'Data', icon: Database },
   ]
   const [active, setActive] = useState(route.section ?? 'appearance')

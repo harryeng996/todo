@@ -5,10 +5,10 @@ import { useTodos } from '../../../state/useTodos.ts'
 import { useToday } from '../../../state/useToday.ts'
 import { useWeights } from '../../../state/useWeights.ts'
 import { useAppSettings, useTargetList } from '../state/appContext.ts'
-import { buildPosterData, type PosterData } from './posterData.ts'
+import { buildSaverData, type SaverData } from './saverData.ts'
 
-/** Everything the posters show, recomputed only when the data changes. */
-export function usePosterData(): PosterData {
+/** Everything the screensaver shows, recomputed only when the data changes. */
+export function useSaverData(): SaverData {
   const today = useToday()
   const { todos } = useTodos()
   const { sessions } = usePomodoro()
@@ -18,7 +18,7 @@ export function usePosterData(): PosterData {
   const { settings } = useAppSettings()
   return useMemo(
     () =>
-      buildPosterData({
+      buildSaverData({
         today,
         todos,
         sessions,

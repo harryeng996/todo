@@ -13,7 +13,7 @@ import {
   sumDays,
 } from '../lib/stats.ts'
 
-export interface PosterData {
+export interface SaverData {
   today: DateKey
   tasks: {
     today: number
@@ -60,7 +60,7 @@ interface Input {
   targets: Target[]
 }
 
-export function buildPosterData(input: Input): PosterData {
+export function buildSaverData(input: Input): SaverData {
   const { today, todos } = input
   const byDay = doneCountsByDay(todos)
   const todays = todos.filter((t) => t.date === today)
@@ -70,7 +70,7 @@ export function buildPosterData(input: Input): PosterData {
     (p) => p.value,
   )
 
-  let weight: PosterData['weight'] = null
+  let weight: SaverData['weight'] = null
   if (input.weightTracking) {
     const points = Object.entries(input.log)
       .filter(([d, e]) => e.kg !== null && d <= today)
@@ -138,87 +138,3 @@ export function hm(minutes: number): string {
   const h = Math.floor(m / 60)
   return h ? `${h}h ${m % 60}m` : `${m}m`
 }
-
-export interface Definition {
-  word: string
-  phonetic: string
-  kind: string
-  text: string
-  chart: 'heatmap' | 'focus' | 'weight' | 'tasks'
-}
-
-const plural = (n: number, one: string, many = `${one}s`) =>
-  `${n} ${n === 1 ? one : many}`
-
-/** Dictionary-style entries written from the data; the poster cycles through them. */
-export function definitions(data: PosterData): Definition[] {
-  const { tasks, focus, weight, target } = data
-  const list: Definition[] = []
-  const diff = tasks.done7 - tasks.donePrev7
-  list.push({
-    word: 'momentum',
-    phonetic: 'mo·men·tum',
-    kind: 'noun',
-    text:
-      tasks.done7 > 0
-        ? `the quiet force of ${plural(tasks.done7, 'task')} finished in the last seven days${
-            diff > 0
-              ? `, ${diff} more than the week before`
-              : diff < 0
-                ? `, ${-diff} fewer than the week before`
-                : ''
-          }. one small push keeps it going.`
-        : 'what the first finished task of the week starts. it only needs one.',
-    chart: 'tasks',
-  })
-  if (tasks.streak >= 2)
-    list.push({
-      word: 'streak',
-      phonetic: 'strēk',
-      kind: 'noun',
-      text: `${plural(tasks.streak, 'day')} in a row of getting at least one thing done${
-        tasks.bestStreak > tasks.streak
-          ? `. the best run so far: ${tasks.bestStreak}`
-          : '. the longest run yet'
-      }.`,
-      chart: 'heatmap',
-    })
-  if (focus.enabled && focus.minutes7 > 0)
-    list.push({
-      word: 'focus',
-      phonetic: 'fō·kəs',
-      kind: 'noun',
-      text: `${hm(focus.minutes7)} given to one thing at a time this week. today: ${hm(focus.minutesToday)} across ${plural(focus.sessionsToday, 'session')}.`,
-      chart: 'focus',
-    })
-  if (weight)
-    list.push({
-      word: 'progress',
-      phonetic: 'prog·ress',
-      kind: 'noun',
-      text:
-        weight.change30 === null
-          ? `${weight.current.toFixed(1)} ${weight.unit} at the last weigh-in. every entry makes the line clearer.`
-          : `${weight.current.toFixed(1)} ${weight.unit} today, ${Math.abs(weight.change30).toFixed(1)} ${weight.unit} ${
-              weight.change30 <= 0 ? 'lighter' : 'heavier'
-            } than a month ago. measured, not guessed.`,
-      chart: 'weight',
-    })
-  if (target && target.daysLeft > 0)
-    list.push({
-      word: 'deadline',
-      phonetic: 'ded·līn',
-      kind: 'noun',
-      text: `${plural(target.daysLeft, 'day')} until “${target.title}”. ${Math.round(target.progress * 100)}% of the time has passed; the rest is still yours.`,
-      chart: 'heatmap',
-    })
-  return list
-}
-
-/** Short hand-lettered sayings for the sketch poster (original lines). */
-export const SAYINGS = [
-  ['ONE THING', 'AT A TIME,', 'THEN THE NEXT'],
-  ['SMALL STEPS', 'STILL MOVE', 'YOU FORWARD'],
-  ['COFFEE FIRST,', 'THEN THE', 'LIST'],
-  ['DONE IS A', 'NICE PLACE', 'TO BE'],
-] as const

@@ -228,7 +228,8 @@ describe('v2 settings screen', () => {
     const final = screen.getByLabelText('Final day')
     await user.type(final, '2099-01-01')
     await user.click(screen.getByRole('button', { name: 'Save' }))
-    expect(await screen.findByText('Marathon')).toBeInTheDocument()
+    const card = document.getElementById('settings-targets')!
+    expect(await within(card).findByText('Marathon')).toBeInTheDocument()
     expect(
       JSON.parse(localStorage.getItem('todoapp.targets.v2')!)[0],
     ).toMatchObject({ title: 'Marathon', endDate: '2099-01-01' })
@@ -263,7 +264,7 @@ describe('v2 settings screen', () => {
 })
 
 describe('v2 screensaver', () => {
-  it('opens from the sidebar, steps through pictures and closes on a key', async () => {
+  it('opens from the sidebar with the clock and widgets, and closes on a key', async () => {
     const user = userEvent.setup()
     render(<App />)
     await screen.findByRole('heading', { level: 1 })
@@ -271,9 +272,16 @@ describe('v2 screensaver', () => {
       screen.getByRole('button', { name: 'Show the screensaver' }),
     )
     const saver = await screen.findByRole('dialog', { name: /Screensaver/ })
-    expect(within(saver).getByText('Plan.')).toBeInTheDocument()
-    await user.keyboard('{ArrowRight}')
-    expect(await within(saver).findByText('momentum')).toBeInTheDocument()
+    const now = new Date()
+    const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    expect(within(saver).getByLabelText(hhmm)).toBeInTheDocument()
+    expect(within(saver).getByText('Streak')).toBeInTheDocument()
+    expect(within(saver).getByText('tasks done')).toBeInTheDocument()
+    // The colour button cycles the theme and is not an exit.
+    await user.click(within(saver).getByTitle('Change colours'))
+    expect(
+      JSON.parse(localStorage.getItem('todoapp.settings.v1')!).screensaverTheme,
+    ).toBe('dusk')
     await user.keyboard('{Escape}')
     await waitFor(() =>
       expect(

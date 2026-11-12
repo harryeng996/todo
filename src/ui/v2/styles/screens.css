@@ -1713,79 +1713,43 @@ em.chip {
   }
 }
 
-/* Screensaver picture picker (Settings) */
-/* Block, not a flex column: a grid of aspect-ratio frames inside a column
-   flexbox gets measured at its max-content width and grows very tall. */
-.field-row--stack {
-  display: block;
-}
-.field-row--stack > * + * {
-  margin-top: 12px;
-}
-.poster-picker {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
-  gap: 12px;
-  min-height: 170px;
-}
-.poster-pick {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
+/* Screensaver (Settings) */
+.saver-preview--loading {
+  aspect-ratio: 16 / 9;
   background: var(--surface-2);
-  color: var(--text-2);
-  text-align: left;
-  transition:
-    border-color 0.15s,
-    background-color 0.15s;
+  margin-bottom: 4px;
 }
-.poster-pick.is-on {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--text);
+.saver-preview {
+  margin-bottom: 4px;
 }
-.poster-pick__frame {
-  display: block;
-  aspect-ratio: 3 / 4;
-  padding: 5px;
-  border-radius: 3px;
-  background: linear-gradient(
-    135deg,
-    #cfa572,
-    #b98a54 38%,
-    #d6ad7c 62%,
-    #b88a56
-  );
-  box-shadow: 0 6px 14px -6px rgb(40 24 10 / 0.45);
-}
-.poster-pick__frame .frame__paper {
-  display: block;
-}
-.poster-pick:not(.is-on) .poster-pick__frame {
-  opacity: 0.55;
-  filter: grayscale(0.5);
-}
-.poster-pick__label {
+.swatches {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12.5px;
-  font-weight: 600;
+  flex-wrap: wrap;
+  gap: 10px;
 }
-.poster-pick__check {
+.swatch {
   display: grid;
   place-items: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 5px;
-  border: 1.5px solid var(--border-strong);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: none;
   color: #fff;
-  flex: none;
+  box-shadow:
+    0 0 0 1px rgb(0 0 0 / 0.08),
+    inset 0 0 0 1px rgb(255 255 255 / 0.25);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
 }
-.is-on .poster-pick__check {
-  background: var(--accent);
-  border-color: var(--accent);
+.swatch:hover {
+  transform: scale(1.08);
+}
+.swatch.is-on {
+  box-shadow:
+    0 0 0 2px var(--surface),
+    0 0 0 4px var(--accent);
+}
+.swatch svg {
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.5));
 }
