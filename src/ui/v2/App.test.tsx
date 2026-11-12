@@ -160,3 +160,54 @@ describe('v2 focus screen', () => {
     expect(screen.getByText('By task')).toBeInTheDocument()
   })
 })
+
+describe('v2 body screen', () => {
+  function openBody() {
+    localStorage.setItem(
+      'todoapp.settings.v1',
+      JSON.stringify({ weightTracking: true }),
+    )
+    localStorage.setItem(
+      'todoapp.weight.v1',
+      JSON.stringify({
+        '2026-01-01': { kg: 80, photos: [] },
+        '2026-01-08': { kg: 79.2, photos: [] },
+      }),
+    )
+    location.hash = '#/body'
+    render(<App />)
+  }
+
+  it('shows the latest weight, its change and the log', async () => {
+    openBody()
+    expect(
+      await screen.findByRole('heading', { name: 'Body', level: 1 }),
+    ).toBeInTheDocument()
+    expect(screen.getByText('Current weight')).toBeInTheDocument()
+    expect(screen.getByText('2 weigh-ins')).toBeInTheDocument()
+  })
+
+  it('logs today’s weight from the sheet', async () => {
+    const user = userEvent.setup()
+    openBody()
+    await user.click(await screen.findByRole('button', { name: 'Log weight' }))
+    const input = await screen.findByLabelText('Weight in kg')
+    await user.clear(input)
+    await user.type(input, '78.6')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('3 weigh-ins')).toBeInTheDocument()
+    expect(
+      JSON.parse(localStorage.getItem('todoapp.weight.v1')!),
+    ).toMatchObject({ '2026-01-01': { kg: 80 } })
+  })
+
+  it('sets a goal and shows progress', async () => {
+    const user = userEvent.setup()
+    openBody()
+    await user.click(await screen.findByRole('button', { name: /Set a goal/ }))
+    const input = await screen.findByLabelText('Goal in kg')
+    await user.type(input, '76')
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('20%')).toBeInTheDocument() // 80 → 79.2 of 80 → 76
+  })
+})

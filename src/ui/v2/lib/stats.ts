@@ -199,3 +199,28 @@ export function minutesByTask(
     (a, b) => b.minutes - a.minutes || a.title.localeCompare(b.title),
   )
 }
+
+/** 0..1: how far `current` has come from `start` towards `goal`. */
+export function goalProgress(
+  start: number,
+  current: number,
+  goal: number,
+): number {
+  if (start === goal) return current === goal ? 1 : 0
+  return Math.min(Math.max((start - current) / (start - goal), 0), 1)
+}
+
+/**
+ * Days until `goal` at `perWeek` (signed change per week), or null when the
+ * trend points away from the goal or is flat. 0 once reached.
+ */
+export function daysToGoal(
+  current: number,
+  goal: number,
+  perWeek: number | null,
+): number | null {
+  const remaining = goal - current
+  if (Math.abs(remaining) < 0.05) return 0
+  if (!perWeek || Math.sign(perWeek) !== Math.sign(remaining)) return null
+  return Math.ceil((remaining / perWeek) * 7)
+}

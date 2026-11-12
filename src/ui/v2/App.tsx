@@ -14,7 +14,7 @@ import { WeightProvider } from '../../state/WeightContext.tsx'
 import { ConfettiProvider } from './components/Confetti.tsx'
 import { useConfetti } from './components/confettiContext.ts'
 import { ToastProvider } from './components/Toast.tsx'
-import { ComingSoon } from './screens/ComingSoon.tsx'
+import { BodyScreen } from './screens/body/BodyScreen.tsx'
 import { FocusScreen } from './screens/focus/FocusScreen.tsx'
 import { HomeScreen } from './screens/home/HomeScreen.tsx'
 import { SettingsScreen } from './screens/settings/SettingsScreen.tsx'
@@ -28,7 +28,7 @@ const screens = {
   home: () => <HomeScreen />,
   tasks: () => <TasksScreen />,
   focus: () => <FocusScreen />,
-  body: () => <ComingSoon title="Body" />,
+  body: () => <BodyScreen />,
   settings: () => <SettingsScreen />,
 }
 

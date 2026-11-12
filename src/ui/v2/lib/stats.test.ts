@@ -4,6 +4,8 @@ import { niceTicks } from '../charts/scale.ts'
 import { parseHash } from './router.ts'
 import {
   daySeries,
+  daysToGoal,
+  goalProgress,
   greeting,
   minutesByHour,
   minutesByTask,
@@ -186,5 +188,21 @@ describe('focus breakdowns', () => {
       { title: 'A', minutes: 50, count: 2 },
       { title: 'No task', minutes: 25, count: 1 },
     ])
+  })
+})
+
+describe('weight goal', () => {
+  it('measures progress either way', () => {
+    expect(goalProgress(80, 77, 74)).toBeCloseTo(0.5)
+    expect(goalProgress(60, 63, 66)).toBeCloseTo(0.5)
+    expect(goalProgress(80, 82, 74)).toBe(0) // moved away
+    expect(goalProgress(80, 70, 74)).toBe(1) // past it
+  })
+
+  it('estimates the days left only when the trend heads there', () => {
+    expect(daysToGoal(78, 74, -0.5)).toBe(56)
+    expect(daysToGoal(78, 74, 0.5)).toBeNull()
+    expect(daysToGoal(78, 74, null)).toBeNull()
+    expect(daysToGoal(74.02, 74, -0.5)).toBe(0)
   })
 })
