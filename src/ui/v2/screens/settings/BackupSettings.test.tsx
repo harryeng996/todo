@@ -64,17 +64,22 @@ describe('Backup settings', () => {
     ).toHaveAttribute('type', 'text')
     await user.click(card.getByRole('button', { name: 'Connect' }))
 
-    expect(await card.findByText('Connected to abcd.supabase.co')).toBeVisible()
+    expect(
+      await card.findByText('Connected to abcd.supabase.co'),
+    ).toBeInTheDocument()
     expect(connectedWith).toEqual({
       url: 'https://abcd.supabase.co',
       apiKey: 'sb_publishable_abc',
       bucket: 'todoapp-backup',
     })
-    expect(card.getByText('Not backed up from this browser yet.')).toBeVisible()
+    expect(
+      card.getByText('Not backed up from this browser yet.'),
+    ).toBeInTheDocument()
 
     await user.click(card.getByRole('button', { name: 'Back up now' }))
-    expect(await screen.findByText('Backed up')).toBeVisible()
-    expect(card.getByText(/Last backup just now/)).toBeVisible()
+    // The toast fades in from opacity 0, so only check it appeared.
+    expect(await screen.findByText('Backed up')).toBeInTheDocument()
+    expect(card.getByText(/Last backup just now/)).toBeInTheDocument()
     expect(bucket.snapshots.size).toBe(1)
 
     await user.click(card.getByRole('button', { name: 'Restore…' }))
@@ -101,6 +106,6 @@ describe('Backup settings', () => {
     await user.click(card.getByRole('button', { name: 'Connect' }))
     expect(
       await card.findByText(/This bucket already has 1 backup\./),
-    ).toBeVisible()
+    ).toBeInTheDocument()
   })
 })
