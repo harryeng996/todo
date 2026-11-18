@@ -1,4 +1,5 @@
 import {
+  CloudUpload,
   Database,
   Clock3,
   Monitor,
@@ -23,6 +24,7 @@ import { Switch } from '../../components/Switch.tsx'
 import { navigate, replaceRoute, useRoute } from '../../lib/router.ts'
 import { useAppSettings } from '../../state/appContext.ts'
 import { useWeightGoal } from '../../state/weightGoal.ts'
+import { BackupSettings } from './BackupSettings.tsx'
 import { DataSettings } from './DataSettings.tsx'
 import { ScreensaverSettings } from './ScreensaverSettings.tsx'
 import { PomodoroSettings } from './PomodoroSettings.tsx'
@@ -53,6 +55,7 @@ export function SettingsScreen() {
       ? [{ id: 'videos', label: 'Videos', icon: MonitorPlay }]
       : []),
     { id: 'screensaver', label: 'Screensaver', icon: Clock3 },
+    { id: 'backup', label: 'Backup', icon: CloudUpload },
     { id: 'data', label: 'Data', icon: Database },
   ]
   const [active, setActive] = useState(route.section ?? 'appearance')
@@ -108,7 +111,7 @@ export function SettingsScreen() {
     <ScreenBody>
       <ScreenHeader
         title="Settings"
-        subtitle="Everything is saved in this browser only."
+        subtitle="Everything is saved in this browser, and backed up only if you set it up."
       />
       <div className="settings-layout">
         <nav className="settings-nav" aria-label="Settings sections">
@@ -140,6 +143,7 @@ export function SettingsScreen() {
           <QuoteSettings id={sectionId('quotes')} />
           {settings.youtube && <VideoSettings id={sectionId('videos')} />}
           <ScreensaverSettings id={sectionId('screensaver')} />
+          <BackupSettings id={sectionId('backup')} />
           <DataSettings id={sectionId('data')} />
         </div>
       </div>
@@ -242,7 +246,7 @@ function FeatureSettings({ id }: { id: string }) {
             Weight tracking <em className="chip chip--accent">Plus</em>
           </>
         }
-        hint="The Body screen: weight, goal and progress photos. Stored only in this browser."
+        hint="The Body screen: weight, goal and progress photos. Stored in this browser."
         checked={settings.weightTracking}
         onChange={(weightTracking) => update({ weightTracking })}
       />

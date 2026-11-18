@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { startAutoBackup } from '../../state/backup.ts'
 import {
   formatCountdown,
   phaseLabel,
@@ -45,6 +46,12 @@ function CelebrateSessions() {
   return null
 }
 
+/** The daily backup, while the app is open (does nothing until Backup is set up). */
+function AutoBackup() {
+  useEffect(() => startAutoBackup(), [])
+  return null
+}
+
 const BASE_TITLE = document.title
 
 /** While the timer runs, the tab title shows the countdown (as in v1). */
@@ -79,6 +86,7 @@ export default function App() {
                       <VideoDockProvider>
                         <CelebrateSessions />
                         <TitleTicker />
+                        <AutoBackup />
                         <ScreensaverProvider>
                           <Shell screens={screens} />
                         </ScreensaverProvider>

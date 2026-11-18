@@ -34,7 +34,7 @@ export function WeightSheet(props: WeightSheetProps) {
       open={props.open}
       onClose={props.onClose}
       title="Log weight"
-      description="One entry per day. Photos stay in this browser only."
+      description="One entry per day. Photos are kept in this browser."
     >
       {props.open && <WeightForm key={props.date} {...props} />}
     </Sheet>

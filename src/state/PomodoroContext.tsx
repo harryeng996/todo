@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { playChime } from '../lib/chime.ts'
-import { createRecordStore } from '../lib/recordStore.ts'
 import { createJsonStore } from '../lib/storage.ts'
 import {
   applyConfig,
@@ -15,6 +14,7 @@ import {
   type PomodoroConfig,
   type TimerState,
 } from './pomodoro.ts'
+import { sessionRecords } from './sessionStore.ts'
 import { PomodoroContext, type PomodoroContextValue } from './usePomodoro.ts'
 
 interface PomodoroState {
@@ -31,16 +31,6 @@ const timerStore = createJsonStore<TimerState | null>(
   'todoapp.pomodoro.timer.v1',
   () => null,
 )
-const SESSIONS_V1 = 'todoapp.pomodoro.sessions.v1'
-
-/** Finished sessions grow every day: IndexedDB, one record each, oldest first. */
-const sessionRecords = createRecordStore<FocusSession>({
-  dbName: 'todoapp-focus-sessions',
-  legacy: createJsonStore<FocusSession[]>(SESSIONS_V1, () => []),
-  legacyKeys: [SESSIONS_V1],
-  compare: (a, b) => a.end - b.end,
-})
-
 function load(sessions: FocusSession[]): PomodoroState {
   const config = { ...DEFAULT_CONFIG, ...configStore.load() }
   return {

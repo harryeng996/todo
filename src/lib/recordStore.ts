@@ -22,6 +22,11 @@ export interface RecordStore<T extends StoredRecord> {
    * reference, so unchanged ones (same object) aren't written again.
    */
   sync(previous: T[], next: T[]): Promise<void>
+  /**
+   * Replaces the whole list (restoring a backup). Throws when it can't be
+   * saved, so a restore never reports success with the old list still there.
+   */
+  replaceAll(items: T[]): Promise<void>
 }
 
 interface RecordStoreOptions<T> {
@@ -99,18 +104,19 @@ export function createRecordStore<T extends StoredRecord>({
     return undefined
   }
 
+  function load(): Promise<T[]> {
+    const now = loadNow()
+    if (now) return Promise.resolve(now)
+    // Shared while in flight, so two callers can't both do the first copy.
+    loading ??= loadFromIdb().finally(() => {
+      loading = null
+    })
+    return loading
+  }
+
   return {
     loadNow,
-
-    load() {
-      const now = loadNow()
-      if (now) return Promise.resolve(now)
-      // Shared while in flight, so two callers can't both do the first copy.
-      loading ??= loadFromIdb().finally(() => {
-        loading = null
-      })
-      return loading
-    },
+    load,
 
     async sync(previous, next) {
       if (previous === next) return
@@ -132,6 +138,20 @@ export function createRecordStore<T extends StoredRecord>({
       } catch (error) {
         reportStorageError(error)
       }
+    },
+
+    async replaceAll(items) {
+      await load() // settles the mode (and does the first copy if due)
+      if (mode !== 'idb') {
+        if (!legacy.save(items)) throw new Error('Could not save the list.')
+        return
+      }
+      await store('readwrite', (records) => {
+        records.clear()
+        for (const item of items) records.put(item, item.id)
+        records.put(true, READY)
+        return promisifyRequest(records.transaction)
+      })
     },
   }
 }

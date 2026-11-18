@@ -1701,6 +1701,143 @@ em.chip {
   font-weight: 700;
 }
 
+/* Backup (Settings) */
+.backup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.backup-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.backup-field__key {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.backup-field__key .input {
+  flex: 1;
+}
+.backup-form__error {
+  margin: 0;
+}
+.backup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.backup .backup-actions {
+  padding: 4px 0 14px;
+}
+.backup__connection {
+  border-top: none;
+  padding-top: 0;
+}
+.backup-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 22px;
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+.backup-status > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.backup-status svg {
+  flex: none;
+  color: var(--body);
+}
+.backup-status--error,
+.backup-status .backup-status--error svg {
+  color: var(--danger);
+}
+.callout {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--accent-soft);
+  color: var(--text);
+  font-size: 13.5px;
+}
+.backup-guide {
+  padding: 12px 0 2px;
+  border-top: 1px solid var(--border);
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+.backup-guide summary {
+  cursor: pointer;
+  font-weight: 550;
+  color: var(--accent-text);
+}
+.backup-guide ol {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 0;
+  padding-left: 20px;
+}
+.backup-guide a {
+  color: var(--accent-text);
+}
+.backup-guide__sql {
+  margin: 8px 0 6px;
+  padding: 10px 12px;
+  overflow-x: auto;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font:
+    12px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    Consolas,
+    monospace;
+}
+.backup-file {
+  margin-top: 6px;
+}
+.backup-list {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+.backup-list__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-top: 1px solid var(--border);
+  cursor: pointer;
+}
+.backup-list__item:first-of-type {
+  border-top: none;
+}
+.backup-list__item input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+}
+.data-counts dd.backup-made {
+  font-size: 14px;
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (max-width: 1100px) and (min-width: 721px) {
   .body-layout .insights {
     grid-template-columns: repeat(3, minmax(0, 1fr));
