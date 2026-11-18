@@ -1,6 +1,5 @@
 import { toDateKey } from '../date.ts'
-import { readSnapshot } from './run.ts'
-import { collectSnapshot, type Snapshot } from './snapshot.ts'
+import { collectSnapshot, readSnapshot, type Snapshot } from './snapshot.ts'
 
 /** Saves this browser's data (without photos) as a JSON file. */
 export async function downloadBackupFile(now = new Date()): Promise<void> {

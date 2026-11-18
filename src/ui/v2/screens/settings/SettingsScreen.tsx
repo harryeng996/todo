@@ -1,7 +1,7 @@
 import {
-  CloudUpload,
   Database,
   Clock3,
+  HardDrive,
   Monitor,
   Moon,
   MonitorPlay,
@@ -55,7 +55,7 @@ export function SettingsScreen() {
       ? [{ id: 'videos', label: 'Videos', icon: MonitorPlay }]
       : []),
     { id: 'screensaver', label: 'Screensaver', icon: Clock3 },
-    { id: 'backup', label: 'Backup', icon: CloudUpload },
+    { id: 'backup', label: 'Backup', icon: HardDrive },
     { id: 'data', label: 'Data', icon: Database },
   ]
   const [active, setActive] = useState(route.section ?? 'appearance')
@@ -111,7 +111,7 @@ export function SettingsScreen() {
     <ScreenBody>
       <ScreenHeader
         title="Settings"
-        subtitle="Everything is saved in this browser, and backed up only if you set it up."
+        subtitle="Everything is saved in this browser only."
       />
       <div className="settings-layout">
         <nav className="settings-nav" aria-label="Settings sections">
@@ -246,7 +246,7 @@ function FeatureSettings({ id }: { id: string }) {
             Weight tracking <em className="chip chip--accent">Plus</em>
           </>
         }
-        hint="The Body screen: weight, goal and progress photos. Stored in this browser."
+        hint="The Body screen: weight, goal and progress photos. Stored only in this browser."
         checked={settings.weightTracking}
         onChange={(weightTracking) => update({ weightTracking })}
       />

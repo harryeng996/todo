@@ -63,7 +63,7 @@ export function DataSettings({ id }: { id: string }) {
       id={id}
       icon={<Database size={16} />}
       title="Data & storage"
-      subtitle="Everything is kept in this browser. Nothing is uploaded unless you set up Backup."
+      subtitle="Everything stays in this browser. Nothing is uploaded."
     >
       <div className="storage">
         <div className="storage__row">
@@ -105,9 +105,9 @@ export function DataSettings({ id }: { id: string }) {
         ))}
       </dl>
       <p className="field-row__hint">
-        Clearing this site’s data in the browser deletes all of it (a backup, if
-        you made one, can bring it back). Both interfaces (v1 and v2) read the
-        same data.
+        Clearing this site’s data in the browser deletes all of it; an exported
+        backup file brings back everything but photos. Both interfaces (v1 and
+        v2) read the same data.
       </p>
     </Card>
   )

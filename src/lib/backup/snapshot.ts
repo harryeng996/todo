@@ -4,20 +4,23 @@ import { todoRecords } from '../../state/todoStore.ts'
 import type { Todo } from '../../types/todo.ts'
 import { normalizeLog, slidesOf, type PhotoKey } from '../weight.ts'
 
-/** Where the backup settings (with the API key) are kept. Never backed up. */
-export const BACKUP_CONFIG_KEY = 'todoapp.backup.v1'
+/**
+ * Where the removed Supabase backup kept its settings, API key included.
+ * Deleted at startup (forgetSupabaseBackup) and never exported.
+ */
+const SUPABASE_BACKUP_KEY = 'todoapp.backup.v1'
 
 const PREFIX = 'todoapp.'
 /** The weight log (WeightContext); its days list the photo keys. */
 const WEIGHT_KEY = 'todoapp.weight.v1'
 
 /**
- * localStorage keys a snapshot leaves alone, on both backup and restore:
- * the backup settings, a running timer (belongs to this device), and the
+ * localStorage keys a snapshot leaves alone, on both export and import:
+ * the old backup settings, a running timer (belongs to this device), and the
  * lists' old localStorage copies (the lists travel as `todos` / `sessions`).
  */
 const LOCAL_ONLY = new Set([
-  BACKUP_CONFIG_KEY,
+  SUPABASE_BACKUP_KEY,
   'todoapp.pomodoro.timer.v1',
   'todoapp.todos.v1',
   'todoapp.todos.v2',
@@ -85,6 +88,17 @@ const isRecordList = (value: unknown): value is { id: string }[] =>
   Array.isArray(value) &&
   value.every((item) => isObject(item) && typeof item.id === 'string')
 
+/** A snapshot from a backup file's text; throws a readable error for anything else. */
+export function readSnapshot(text: string): Snapshot {
+  let value: unknown
+  try {
+    value = JSON.parse(text)
+  } catch {
+    throw new Error('This file isn’t a To-do backup (it isn’t JSON).')
+  }
+  return parseSnapshot(value)
+}
+
 /** Checks that `value` is a snapshot this version can restore; throws a readable error if not. */
 export function parseSnapshot(value: unknown): Snapshot {
   if (!isObject(value) || value.app !== 'todoapp')
@@ -116,5 +130,17 @@ export async function applySnapshot(snapshot: Snapshot): Promise<void> {
   for (const [key, value] of Object.entries(snapshot.local)) {
     if (!key.startsWith(PREFIX) || LOCAL_ONLY.has(key)) continue
     localStorage.setItem(key, JSON.stringify(value))
+  }
+}
+
+/**
+ * The app once backed up to the person's own Supabase project and kept its
+ * API key here; that feature is gone, so the key shouldn't stay behind.
+ */
+export function forgetSupabaseBackup(): void {
+  try {
+    localStorage.removeItem(SUPABASE_BACKUP_KEY)
+  } catch {
+    // Blocked storage: nothing could have been saved there either.
   }
 }

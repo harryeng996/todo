@@ -65,26 +65,6 @@ export async function savePhoto(
   void navigator.storage?.persist?.()
 }
 
-/** Keys of every photo stored in this browser (not thumbnails or markers). */
-export async function storedPhotoKeys(): Promise<Set<PhotoKey>> {
-  const all = await keys(photoDb)
-  return new Set(
-    all
-      .map(String)
-      .filter(
-        (key) => !key.startsWith(THUMB_PREFIX) && !key.startsWith('meta:'),
-      ),
-  )
-}
-
-/**
- * Stores a photo brought back from a backup under its own key. Its thumbnail
- * is made when it is first shown.
- */
-export function storeRestoredPhoto(key: PhotoKey, photo: Blob): Promise<void> {
-  return set(key, photo, photoDb)
-}
-
 /** Deletes photos and their thumbnails. */
 export function deletePhotos(keys: readonly PhotoKey[]): Promise<void> {
   if (!keys.length) return Promise.resolve()

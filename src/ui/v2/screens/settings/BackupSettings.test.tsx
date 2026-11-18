@@ -1,12 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { resetBackupForTests } from '../../../../state/backup.ts'
-import { memoryBackup } from '../../../../test/memoryBackup.ts'
 import App from '../../App.tsx'
-
-let bucket = memoryBackup()
-let connectedWith: unknown = null
 
 beforeEach(() => {
   location.hash = '#/settings/backup'
@@ -18,94 +13,98 @@ beforeEach(() => {
   })) as unknown as typeof window.matchMedia
   // jsdom has no layout; Settings scrolls to the section it opens at.
   Element.prototype.scrollIntoView ??= () => {}
-  bucket = memoryBackup()
-  connectedWith = null
-  resetBackupForTests((connection) => {
-    connectedWith = connection
-    return bucket.provider
-  })
 })
 
 async function openBackup() {
   render(<App />)
   return within(
     (await screen.findByRole('heading', { name: 'Backup' })).closest(
-      'section, .card',
+      '.card',
     ) as HTMLElement,
   )
 }
 
+const backupFile = (text: string) =>
+  new File([text], 'todo-backup.json', { type: 'application/json' })
+
 describe('Backup settings', () => {
-  it('explains what is wrong with the form', async () => {
+  it('exports the data as a JSON file', async () => {
+    const created: Blob[] = []
+    URL.createObjectURL = vi.fn((blob: Blob) => {
+      created.push(blob)
+      return 'blob:backup'
+    })
+    URL.revokeObjectURL = vi.fn()
+    const click = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => {})
     const user = userEvent.setup()
     const card = await openBackup()
-    await user.click(card.getByRole('button', { name: 'Connect' }))
-    expect(card.getByRole('alert')).toHaveTextContent('Enter the project URL')
 
-    await user.type(card.getByLabelText('Project URL'), 'abcd.supabase.co')
-    await user.click(card.getByRole('button', { name: 'Connect' }))
-    expect(card.getByRole('alert')).toHaveTextContent('anon or publishable key')
+    await user.click(card.getByRole('button', { name: 'Export' }))
+
+    await vi.waitFor(() => expect(click).toHaveBeenCalledOnce())
+    const link = click.mock.contexts[0] as HTMLAnchorElement
+    expect(link.download).toMatch(/^todo-backup-\d{4}-\d\d-\d\d\.json$/)
+    const exported = JSON.parse(await created[0].text())
+    expect(exported.app).toBe('todoapp')
+    expect(exported.todos.length).toBeGreaterThan(0)
+    click.mockRestore()
   })
 
-  it('connects, backs up and restores', async () => {
+  it('shows what a file holds and imports it after confirming', async () => {
     const reload = vi.fn()
     vi.stubGlobal('location', { ...location, reload, hash: location.hash })
     const user = userEvent.setup()
     const card = await openBackup()
 
-    await user.type(card.getByLabelText('Project URL'), 'abcd.supabase.co/')
-    await user.type(
-      card.getByLabelText('API key (anon or publishable)'),
-      'sb_publishable_abc',
+    const file = backupFile(
+      JSON.stringify({
+        app: 'todoapp',
+        format: 1,
+        createdAt: '2026-11-01T08:00:00.000Z',
+        local: { 'todoapp.settings.v1': { theme: 'dark' } },
+        todos: [
+          {
+            id: 'a',
+            title: 'From the file',
+            done: false,
+            date: '2026-11-01',
+            createdAt: '2026-11-01T08:00:00.000Z',
+          },
+        ],
+        sessions: [],
+      }),
     )
-    await user.click(card.getByRole('button', { name: 'Show key' }))
-    expect(
-      card.getByLabelText('API key (anon or publishable)'),
-    ).toHaveAttribute('type', 'text')
-    await user.click(card.getByRole('button', { name: 'Connect' }))
+    await user.upload(card.getByLabelText('Backup file to import'), file)
 
-    expect(
-      await card.findByText('Connected to abcd.supabase.co'),
-    ).toBeInTheDocument()
-    expect(connectedWith).toEqual({
-      url: 'https://abcd.supabase.co',
-      apiKey: 'sb_publishable_abc',
-      bucket: 'todoapp-backup',
-    })
-    expect(
-      card.getByText('Not backed up from this browser yet.'),
-    ).toBeInTheDocument()
-
-    await user.click(card.getByRole('button', { name: 'Back up now' }))
-    // The toast fades in from opacity 0, so only check it appeared.
-    expect(await screen.findByText('Backed up')).toBeInTheDocument()
-    expect(card.getByText(/Last backup just now/)).toBeInTheDocument()
-    expect(bucket.snapshots.size).toBe(1)
-
-    await user.click(card.getByRole('button', { name: 'Restore…' }))
     const dialog = await screen.findByRole('dialog', {
-      name: 'Restore a backup',
+      name: 'Import this backup?',
     })
-    expect(await within(dialog).findByRole('radio')).toBeChecked()
+    expect(within(dialog).getByText('Tasks').nextSibling).toHaveTextContent('1')
     await user.click(
       within(dialog).getByRole('button', { name: 'Replace my data' }),
     )
     await vi.waitFor(() => expect(reload).toHaveBeenCalledOnce())
+    expect(JSON.parse(localStorage.getItem('todoapp.todos.v2')!)).toEqual([
+      expect.objectContaining({ title: 'From the file' }),
+    ])
+    expect(JSON.parse(localStorage.getItem('todoapp.settings.v1')!)).toEqual({
+      theme: 'dark',
+    })
     vi.unstubAllGlobals()
   })
 
-  it('offers to restore when the bucket already has backups', async () => {
-    await bucket.provider.putSnapshot('2026-11-01T08-00-00-000Z.json', '{}')
+  it('says when a file isn’t a backup', async () => {
     const user = userEvent.setup()
     const card = await openBackup()
-    await user.type(card.getByLabelText('Project URL'), 'abcd.supabase.co')
-    await user.type(
-      card.getByLabelText('API key (anon or publishable)'),
-      'sb_publishable_abc',
+    await user.upload(
+      card.getByLabelText('Backup file to import'),
+      backupFile('{"hello": 1}'),
     )
-    await user.click(card.getByRole('button', { name: 'Connect' }))
     expect(
-      await card.findByText(/This bucket already has 1 backup\./),
+      await screen.findByText('This isn’t a To-do backup.'),
     ).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 })

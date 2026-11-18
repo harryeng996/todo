@@ -1,9 +1,11 @@
 import { StrictMode, type ComponentType } from 'react'
 import { createRoot } from 'react-dom/client'
+import { forgetSupabaseBackup } from './lib/backup/snapshot.ts'
 import { registerServiceWorker } from './pwa/register.ts'
 import { loadSettings } from './state/useSettings.ts'
 
 registerServiceWorker()
+forgetSupabaseBackup()
 
 // Only the chosen UI (and its styles) is loaded; Settings switches and reloads.
 // Two separate import() calls on purpose: in one expression the bundler merges
