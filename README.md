@@ -68,8 +68,11 @@ Supabase directly; there is no server of ours in between.
      for delete to anon using (bucket_id = 'todoapp-backup');
    ```
 
-4. **Project Settings → API Keys**: paste the Project URL and the _anon_ / _publishable_
-   key into Settings → Backup. Never the service_role / secret key.
+4. **Project Settings → API Keys**: copy the _Publishable key_ (`sb_publishable_…`; older
+   projects: the _anon_ key). Never a secret / service_role key.
+5. The **Connect** button at the top of the dashboard (or **Project Settings → Data API**)
+   shows the Project URL (`https://<project-ref>.supabase.co`). Paste both into
+   Settings → Backup.
 
 What it does:
 

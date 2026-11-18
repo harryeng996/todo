@@ -147,9 +147,14 @@ function SetupGuide({ bucket }: { bucket: string }) {
           </Button>
         </li>
         <li>
-          <strong>Project Settings → API Keys</strong>: copy the Project URL and
-          the <em>anon</em> (or <em>publishable</em>) key into the form above.
-          Never use the service_role or secret key here.
+          <strong>Project Settings → API Keys</strong>: copy the{' '}
+          <em>Publishable key</em> (sb_publishable_…; older projects: the{' '}
+          <em>anon</em> key). Never a secret or service_role key.
+        </li>
+        <li>
+          The <strong>Connect</strong> button at the top of the dashboard (or{' '}
+          <strong>Project Settings → Data API</strong>) shows the Project URL,
+          like https://abcd1234.supabase.co. Paste both into the form above.
         </li>
       </ol>
       <p className="field-row__hint">
