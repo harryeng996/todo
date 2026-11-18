@@ -1,0 +1,517 @@
+/*
+ * Icon motion. Lucide gives every icon a class named after it (lucide-flame,
+ * lucide-trash-2…), so each icon gets a movement that fits what it means,
+ * wherever it is used, without touching the components.
+ *
+ * - A few icons are always alive: the flame flickers, a loader spins, and the
+ *   timer's hand turns while a Pomodoro runs (:root[data-timer='running']).
+ * - The rest move once when their button or link is hovered or focused.
+ * - A screen's icon in the navigation pops when you switch to it.
+ *
+ * "Reduce motion" (system or Settings) shortens every animation to nothing
+ * (base.css), so none of this plays then.
+ */
+
+:root {
+  --ic-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ic-hover: 0.5s;
+}
+
+.lucide {
+  transform-origin: 50% 50%;
+}
+
+/* ---------- Always alive ---------- */
+
+.lucide-flame {
+  transform-origin: 50% 95%;
+  animation: ic-flicker 1.9s ease-in-out infinite;
+}
+/* Two flames side by side shouldn't move in step. */
+.stat .lucide-flame {
+  animation-delay: -0.7s;
+}
+
+.spin,
+.lucide-loader-circle {
+  animation: ic-spin 0.9s linear infinite;
+}
+
+/* The timer's hand ticks round while a Pomodoro runs. */
+.lucide-timer > :nth-child(2),
+.lucide-clock-3 > path {
+  transform-box: view-box;
+}
+.lucide-timer > :nth-child(2) {
+  transform-origin: 12px 14px;
+}
+.lucide-clock-3 > path {
+  transform-origin: 12px 12px;
+}
+:root[data-timer='running'] .lucide-timer > :nth-child(2) {
+  animation: ic-spin 6s steps(12) infinite;
+}
+
+/* ---------- Navigation: the current screen's icon pops ---------- */
+
+.nav-link[aria-current='page'] svg {
+  animation: ic-pop 0.55s var(--ic-spring);
+}
+
+/* ---------- On hover / keyboard focus ---------- */
+
+/*
+ * One rule per kind of movement. `:is(...)` lists the icons; the parent is any
+ * button, link, label or <summary> being hovered or focused with the keyboard.
+ * Touch screens skip hover (it would stick after a tap).
+ */
+@media (hover: hover) {
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(
+      .lucide-check,
+      .lucide-check-check,
+      .lucide-circle-check,
+      .lucide-circle-check-big,
+      .lucide-house,
+      .lucide-target,
+      .lucide-shield-check,
+      .lucide-database,
+      .lucide-hard-drive,
+      .lucide-calendar-check,
+      .lucide-calendar-clock,
+      .lucide-calendar-days,
+      .lucide-list-checks,
+      .lucide-layout-template,
+      .lucide-grid-3x3,
+      .lucide-columns-2,
+      .lucide-monitor,
+      .lucide-monitor-play,
+      .lucide-toggle-right
+    ) {
+    animation: ic-pop var(--ic-hover) var(--ic-spring);
+  }
+
+  :is(button, a, label, summary):not(:disabled):hover .lucide-plus {
+    animation: ic-plus var(--ic-hover) var(--ic-spring);
+  }
+  :is(button, a, label, summary):not(:disabled):hover .lucide-x {
+    animation: ic-quarter var(--ic-hover) var(--ic-spring);
+  }
+
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(
+      .lucide-arrow-right,
+      .lucide-chevron-right,
+      .lucide-skip-forward,
+      .lucide-play
+    ) {
+    animation: ic-right var(--ic-hover) ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-chevron-left, .lucide-skip-back, .lucide-corner-down-left) {
+    animation: ic-left var(--ic-hover) ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(
+      .lucide-upload,
+      .lucide-cloud-upload,
+      .lucide-arrow-up,
+      .lucide-sunrise
+    ) {
+    animation: ic-up var(--ic-hover) ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-download, .lucide-arrow-down, .lucide-chevron-down) {
+    animation: ic-down var(--ic-hover) ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-external-link, .lucide-arrow-up-right, .lucide-copy) {
+    animation: ic-up-right var(--ic-hover) ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-arrow-down-right, .lucide-trending-down) {
+    animation: ic-down-right var(--ic-hover) ease-in-out;
+  }
+
+  :is(button, a, label, summary):not(:disabled):hover .lucide-refresh-cw {
+    animation: ic-spin 0.7s ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-rotate-ccw, .lucide-history) {
+    animation: ic-spin-back 0.7s ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover .lucide-settings {
+    animation: ic-half 0.7s var(--ic-spring);
+  }
+  :is(button, a, label, summary):not(:disabled):hover .lucide-sun {
+    animation: ic-half 0.8s ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover .lucide-moon {
+    animation: ic-sway 0.8s ease-in-out;
+  }
+
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(
+      .lucide-pencil,
+      .lucide-quote,
+      .lucide-search,
+      .lucide-palette,
+      .lucide-hash,
+      .lucide-link-2,
+      .lucide-gauge,
+      .lucide-trophy,
+      .lucide-chart-column
+    ) {
+    animation: ic-wiggle 0.6s ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover .lucide-scale {
+    animation: ic-seesaw 0.8s ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(
+      .lucide-lock,
+      .lucide-unplug,
+      .lucide-sliders-horizontal,
+      .lucide-circle-alert
+    ) {
+    animation: ic-shake 0.45s ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-eye, .lucide-eye-off) {
+    animation: ic-blink 0.45s ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-camera, .lucide-image-plus) {
+    animation: ic-flash 0.5s var(--ic-spring);
+  }
+  :is(button, a, label, summary):not(:disabled):hover .lucide-flag {
+    transform-origin: 20% 90%;
+    animation: ic-wave 0.8s ease-in-out;
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-maximize-2, .lucide-expand) {
+    animation: ic-grow var(--ic-hover) var(--ic-spring);
+  }
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-shrink, .lucide-minus, .lucide-pause) {
+    animation: ic-squeeze var(--ic-hover) var(--ic-spring);
+  }
+  :is(button, a, label, summary):not(:disabled):hover .lucide-flame {
+    animation-duration: 0.8s;
+  }
+
+  /* Trash: the lid lifts while the can shakes. */
+  :is(button, a):not(:disabled):hover .lucide-trash-2 {
+    animation: ic-shake 0.45s ease-in-out;
+  }
+  .lucide-trash-2 > :nth-child(n + 4) {
+    transform-box: view-box;
+    transform-origin: 3px 6px;
+    transition: transform 0.25s var(--ic-spring);
+  }
+  :is(button, a):not(:disabled):hover .lucide-trash-2 > :nth-child(n + 4) {
+    transform: translateY(-1.5px) rotate(-10deg);
+  }
+
+  /* Clocks and timers: the hand sweeps round once. */
+  :is(button, a, label, summary):not(:disabled):hover
+    :is(.lucide-clock-3 > path, .lucide-timer > :nth-child(2)) {
+    animation: ic-spin 0.8s ease-in-out;
+  }
+}
+
+/* The same movements for keyboard focus (pointer focus doesn't show a ring). */
+:is(button, a, summary):focus-visible
+  :is(.lucide-check-check, .lucide-house, .lucide-circle-check-big) {
+  animation: ic-pop var(--ic-hover) var(--ic-spring);
+}
+:is(button, a, summary):focus-visible .lucide-plus {
+  animation: ic-plus var(--ic-hover) var(--ic-spring);
+}
+:is(button, a, summary):focus-visible
+  :is(.lucide-arrow-right, .lucide-chevron-right) {
+  animation: ic-right var(--ic-hover) ease-in-out;
+}
+:is(button, a, summary):focus-visible .lucide-settings {
+  animation: ic-half 0.7s var(--ic-spring);
+}
+
+/* ---------- Keyframes ---------- */
+
+@keyframes ic-flicker {
+  0%,
+  100% {
+    transform: scale(1, 1) rotate(0deg);
+  }
+  20% {
+    transform: scale(0.95, 1.07) rotate(-3deg);
+  }
+  45% {
+    transform: scale(1.05, 0.95) rotate(2deg);
+  }
+  70% {
+    transform: scale(0.97, 1.05) rotate(-1.5deg);
+  }
+  85% {
+    transform: scale(1.02, 0.98) rotate(1deg);
+  }
+}
+@keyframes ic-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ic-spin-back {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+/* Ends a half turn round: the gear and sun look the same there, so no jump. */
+@keyframes ic-half {
+  to {
+    transform: rotate(180deg);
+  }
+}
+@keyframes ic-quarter {
+  to {
+    transform: rotate(90deg);
+  }
+}
+@keyframes ic-plus {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(45deg) scale(1.2);
+  }
+  100% {
+    transform: rotate(90deg) scale(1);
+  }
+}
+@keyframes ic-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.25) translateY(-1px);
+  }
+  65% {
+    transform: scale(0.92);
+  }
+}
+@keyframes ic-right {
+  50% {
+    transform: translateX(3px);
+  }
+}
+@keyframes ic-left {
+  50% {
+    transform: translateX(-3px);
+  }
+}
+@keyframes ic-up {
+  50% {
+    transform: translateY(-3px);
+  }
+}
+@keyframes ic-down {
+  50% {
+    transform: translateY(3px);
+  }
+}
+@keyframes ic-up-right {
+  50% {
+    transform: translate(2px, -2px);
+  }
+}
+@keyframes ic-down-right {
+  50% {
+    transform: translate(2px, 2px);
+  }
+}
+@keyframes ic-wiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-12deg);
+  }
+  40% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(-6deg);
+  }
+  80% {
+    transform: rotate(3deg);
+  }
+}
+@keyframes ic-seesaw {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  30% {
+    transform: rotate(-10deg);
+  }
+  65% {
+    transform: rotate(7deg);
+  }
+}
+@keyframes ic-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  35% {
+    transform: rotate(-18deg);
+  }
+  70% {
+    transform: rotate(8deg);
+  }
+}
+@keyframes ic-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-2px) rotate(-4deg);
+  }
+  40% {
+    transform: translateX(2px) rotate(4deg);
+  }
+  60% {
+    transform: translateX(-1.5px) rotate(-2deg);
+  }
+  80% {
+    transform: translateX(1px);
+  }
+}
+@keyframes ic-blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  45%,
+  55% {
+    transform: scaleY(0.1);
+  }
+}
+@keyframes ic-flash {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(0.85);
+  }
+  60% {
+    transform: scale(1.15);
+  }
+}
+@keyframes ic-wave {
+  0%,
+  100% {
+    transform: skewY(0deg);
+  }
+  25% {
+    transform: skewY(-8deg);
+  }
+  50% {
+    transform: skewY(6deg);
+  }
+  75% {
+    transform: skewY(-3deg);
+  }
+}
+@keyframes ic-grow {
+  50% {
+    transform: scale(1.25);
+  }
+}
+@keyframes ic-squeeze {
+  50% {
+    transform: scale(0.75);
+  }
+}
+
+/* ---------- The streak badge: a lit flame with sparks ---------- */
+
+.flame {
+  position: relative;
+  overflow: hidden;
+}
+.flame .lucide-flame {
+  position: relative;
+  z-index: 1;
+  animation: none;
+}
+.flame.is-active .lucide-flame {
+  fill: color-mix(in srgb, var(--warn) 22%, transparent);
+  animation: ic-flicker 1.6s ease-in-out infinite;
+}
+/* A warm glow that breathes behind the flame. */
+.flame.is-active::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--warn) 45%, transparent),
+    transparent 70%
+  );
+  animation: flame-glow 1.6s ease-in-out infinite;
+}
+.flame__spark {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--warn);
+  opacity: 0;
+  animation: flame-spark 2.2s ease-out infinite;
+}
+.flame__spark:nth-of-type(2) {
+  margin-left: -7px;
+  animation-delay: 0.75s;
+  animation-duration: 2.6s;
+}
+.flame__spark:nth-of-type(3) {
+  margin-left: 6px;
+  animation-delay: 1.4s;
+  animation-duration: 2s;
+}
+@keyframes flame-glow {
+  0%,
+  100% {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+@keyframes flame-spark {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(4px, -34px) scale(0.3);
+    opacity: 0;
+  }
+}

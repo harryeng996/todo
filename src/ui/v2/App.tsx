@@ -62,6 +62,15 @@ function TitleTicker() {
   useEffect(() => {
     document.title = title
   }, [title])
+  // Timer icons tick while it runs (styles/icons.css).
+  useEffect(() => {
+    const root = document.documentElement
+    if (running) root.dataset.timer = 'running'
+    else delete root.dataset.timer
+    return () => {
+      delete root.dataset.timer
+    }
+  }, [running])
   return null
 }
 

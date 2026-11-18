@@ -192,22 +192,6 @@
   background: var(--warn-soft);
   color: var(--warn);
 }
-.flame.is-active svg {
-  animation: flicker 2.4s ease-in-out infinite;
-  transform-origin: 50% 90%;
-}
-@keyframes flicker {
-  0%,
-  100% {
-    transform: scale(1) rotate(0);
-  }
-  30% {
-    transform: scale(1.08, 0.96) rotate(-3deg);
-  }
-  60% {
-    transform: scale(0.96, 1.06) rotate(2deg);
-  }
-}
 
 /* ================= Tasks ================= */
 .screen-header__actions .input[type='date'] {

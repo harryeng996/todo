@@ -296,6 +296,13 @@ function FlameBadge({ active }: { active: boolean }) {
   return (
     <span className={`flame ${active ? 'is-active' : ''}`} aria-hidden="true">
       <Flame size={26} strokeWidth={1.75} />
+      {active && (
+        <>
+          <i className="flame__spark" />
+          <i className="flame__spark" />
+          <i className="flame__spark" />
+        </>
+      )}
     </span>
   )
 }

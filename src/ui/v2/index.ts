@@ -5,6 +5,7 @@ import './styles/base.css'
 import './styles/components.css'
 import './styles/shell.css'
 import './styles/screens.css'
+import './styles/icons.css'
 import { loadSettings } from '../../state/useSettings.ts'
 import {
   applyTheme,
